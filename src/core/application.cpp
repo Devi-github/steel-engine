@@ -4,6 +4,8 @@
 #include <iostream>
 
 BaseApplication::BaseApplication(int w, int h, const char* title) {
+    BaseApplication::instance = this;
+
     if(!glfwInit()) {
         std::cerr << "Failed to initialize GLFW!" << std::endl;
         return;
@@ -78,6 +80,11 @@ int BaseApplication::run() {
     return exitCode;
 }
 
+BaseApplication &BaseApplication::getInstance()
+{
+    return *BaseApplication::instance;
+}
+
 void BaseApplication::render(double time) {
     
 }
@@ -105,4 +112,6 @@ void BaseApplication::stop(int exitCode) {
 
 void BaseApplication::onResize(GLFWwindow* w, int wid, int hei) {
     glViewport(0, 0, wid, hei);
+    Width = wid;
+    Height = hei;
 }

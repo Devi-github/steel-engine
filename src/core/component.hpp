@@ -10,5 +10,5 @@ public:
     virtual void onStart();
     virtual void onUpdate();
 
-    //SteelObject* gameObject;
+    void* steelObject;
 };

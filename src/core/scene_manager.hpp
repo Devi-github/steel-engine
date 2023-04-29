@@ -9,6 +9,6 @@ public:
     void tick();
     void addObject(SteelObject*);
 
-private:
+public:
     std::vector<SteelObject*> objects;
 };

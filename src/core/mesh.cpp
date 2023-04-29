@@ -1,4 +1,6 @@
 #include "mesh.hpp"
+#include "../gameengine/camera.hpp"
+#include "object.hpp"
 
 Mesh::Mesh() {
 
@@ -57,6 +59,13 @@ void MeshRenderer::setMesh(Mesh* mesh)
 void MeshRenderer::draw(GLenum type)
 {
     material->use();
+
+    auto model = ((SteelObject*)steelObject)->transform.modelMatrix();
+
+    material->uniform4x4("model", model);
+    material->uniform4x4("view", Camera::currentCamera->viewMatrix());
+    material->uniform4x4("projection", Camera::currentCamera->projectionMatrix());
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBindVertexArray(vao);
     glDrawElements(type, mesh->vertexCount, GL_UNSIGNED_INT, 0);

@@ -4,9 +4,11 @@
 #include "core/mesh.hpp"
 #include "core/object.hpp"
 #include "core/scene_manager.hpp"
+#include "gameengine/camera.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtx/transform.hpp>
 #include <iostream>
 
 Scene* currentScene = nullptr;
@@ -22,6 +24,9 @@ private:
     bool wireframeMode = false;
 
     Scene scene;
+
+    Camera editorCamera;
+
     bool loaded = false;
 
 private:
@@ -31,6 +36,8 @@ private:
     }
     void init() override {
         BaseApplication::init();
+
+        editorCamera.transform.position = glm::vec3(0, 0, -4);
 
         glClearColor(0.3, 0.7, 1, 1);
 
@@ -59,12 +66,14 @@ private:
         renderer->material = Material::Default();
 
         currentScene = &scene;
+
+        Camera::currentCamera = &editorCamera;
     }
     void update(double time) override {
         BaseApplication::update(time);
 
         if(getMouseButton(1)) {
-            
+
         }
     }
     void render_ui() {
@@ -80,10 +89,17 @@ private:
             }
             ImGui::EndMenu();
         }
-        
+        Transform& objtrans = currentScene->objects[0]->transform;
+
         ImGui::EndMainMenuBar();
 
         ImGui::Begin("Create object");
+
+        ImGui::End();
+
+        ImGui::Begin("Object information");
+
+        ImGui::Text("X: %f Y: %f Z: %f", objtrans.rotation.x, objtrans.rotation.y, objtrans.rotation.z);
 
         ImGui::End();
         imgui_render();
@@ -96,6 +112,10 @@ private:
             stop(1);
             return;
         }
+
+        Transform& objtrans = currentScene->objects[0]->transform;
+
+        objtrans.rotate(glm::vec3(0, time, 0));
 
         currentScene->tick();
 

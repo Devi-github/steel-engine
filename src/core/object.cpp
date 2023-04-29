@@ -2,9 +2,8 @@
 
 SteelObject::SteelObject()
 {
-    auto trans = (BaseComponent*)new Transform();
-    components.insert({typeid(Transform), trans});
-    transform = (Transform*)trans;
+    components.insert({typeid(Transform), (BaseComponent*)(&transform)});
+    transform.steelObject = (void*)this;
 }
 
 void SteelObject::tick() {

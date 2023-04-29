@@ -1,8 +1,9 @@
 #include "scene_manager.hpp"
+#include "../gameengine/camera.hpp"
 
 Scene::Scene()
 {
-
+    Camera::currentCamera = nullptr;
 }
 
 void Scene::tick() {

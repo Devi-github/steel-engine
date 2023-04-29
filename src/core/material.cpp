@@ -46,6 +46,14 @@ void Material::loadShaders(const char *vertex, const char *fragment)
     glDeleteShader(fg);
 }
 
+void Material::uniform4x4(const char* name, glm::mat4 matrix) {
+    glUniformMatrix4fv(getLocation(name), 1, true, (float*)&matrix);
+}
+
+GLuint Material::getLocation(const char* name) {
+    return glGetUniformLocation(program, name);
+}
+
 // TODO: Add error checking
 void Material::compileShader(GLuint shader) {
     glCompileShader(shader);

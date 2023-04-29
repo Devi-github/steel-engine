@@ -9,11 +9,18 @@ public:
     // Runs the application
     int run();
 
+    static BaseApplication* instance;
+    static BaseApplication& getInstance();
+
+    BaseApplication(BaseApplication& other) = delete;
+    void operator=(const BaseApplication&) = delete;
+
     double getTime();
     // Stops the application
     void stop(int exitCode = 0);
 public:
     int Width, Height;
+
 protected:
     virtual void update(double time);
 
