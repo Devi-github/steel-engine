@@ -25,6 +25,8 @@ public:
     void draw(GLenum primitiveType);
 
     Material* material;
+
+    int drawType = GL_TRIANGLES;
     
 private:
     Mesh* mesh;

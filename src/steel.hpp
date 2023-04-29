@@ -8,6 +8,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 #include <string>
@@ -40,7 +41,8 @@ private:
     void init() override {
         BaseApplication::init();
 
-        editorCamera.transform.position = glm::vec3(0, 0, -4);
+        editorCamera.transform.position = glm::vec3(0, 0, 4);
+        editorCamera.transform.rotation = glm::vec3(0, glm::pi<float>(), 0);
 
         glClearColor(0.3, 0.7, 1, 1);
 
@@ -102,16 +104,19 @@ private:
         ImGui::BeginMainMenuBar();
 
         if(ImGui::BeginMenu("File")) {
-            if(ImGui::MenuItem("New Scene")) {
+            if(ImGui::MenuItem("New Scene", "", false, false)) {
                 std::cout << "New Scene is not yet implemented" << std::endl;
             }
-            if(ImGui::MenuItem("Exit")) {
+            if(ImGui::MenuItem("Exit", "ALT+F4")) {
                 stop();
             }
             ImGui::EndMenu();
         }
-        if(ImGui::BeginMenu("SteelObject")) {
-            if(ImGui::MenuItem("Create Test")) {
+        if(ImGui::BeginMenu("Edit")) {
+            if(ImGui::MenuItem("Deselect", "CTRL+SHIFT+D", false, chosenGameObject != nullptr)) {
+                chosenGameObject = nullptr;
+            }
+            if(ImGui::MenuItem("Duplicate", "CTRL+D", false, chosenGameObject != nullptr)) {
                 float vbuf[] = {
                     -0.5, -0.5, 0, 0, 0, -1, 0, 0,
                     0.5, -0.5, 0, 0, 0, -1, 1, 0,
@@ -127,6 +132,12 @@ private:
 
                 SteelObject* obj = new SteelObject();
 
+                obj->transform.position = chosenGameObject->transform.position;
+                obj->transform.rotation = chosenGameObject->transform.rotation;
+                obj->transform.scale = chosenGameObject->transform.scale;
+                
+                if(strlen(obj->name) < 128 - 8)
+                    sprintf(obj->name, "%s (Copy)", obj->name);
                 scene.addObject(obj);
 
                 auto renderer = obj->addComponent<MeshRenderer>();
@@ -135,7 +146,37 @@ private:
             }
             ImGui::EndMenu();
         }
-        if(ImGui::BeginMenu("Window")) {
+        if(ImGui::BeginMenu("SteelObject")) {
+            if(ImGui::BeginMenu("Create Object")) {
+                if(ImGui::MenuItem("New Test")) {
+                    float vbuf[] = {
+                        -0.5, -0.5, 0, 0, 0, -1, 0, 0,
+                        0.5, -0.5, 0, 0, 0, -1, 1, 0,
+                        0, 0.5, 0, 0, 0, -1, 0.5, 1,
+                        0.8, 0.5, 0, 0, 0, -1, 0.9, 1,
+                    };
+                    GLuint indices[] = {
+                        0, 1, 2,
+                        1, 3, 2
+                    };
+
+                    Mesh* mesh = new Mesh(vbuf, indices, sizeof(indices) / sizeof(GLuint));
+
+                    SteelObject* obj = new SteelObject();
+                    
+                    strcpy(obj->name, "New Steel Object");
+
+                    scene.addObject(obj);
+
+                    auto renderer = obj->addComponent<MeshRenderer>();
+                    renderer->setMesh(mesh);
+                    renderer->material = Material::Default();
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenu();
+        }
+        if(ImGui::BeginMenu("Window", false)) {
             ImGui::EndMenu();
         }
 
@@ -148,11 +189,10 @@ private:
             ImGui::BeginListBox("##");
 
             for(auto object : scene.objects) {
-                bool isselected = false;
                 char label[150];
                 sprintf(label, "%s (0x%lx)", object->name, (unsigned long)object);
                 std::string _label = label;
-                if(ImGui::Selectable(_label.c_str(), &isselected)) {
+                if(ImGui::Selectable(_label.c_str(), false)) {
                     chosenGameObject = object;
                 }
             }
@@ -185,7 +225,8 @@ private:
         if(Camera::currentCamera != nullptr) {
             ImGui::Text("Position: X: %f Y: %f Z: %f", editorCamera.transform.position.x, 
                 editorCamera.transform.position.y, editorCamera.transform.position.z);
-            
+            ImGui::Text("Look Direction: X: %f Y: %f Z: %f", editorCamera.transform.forward().x, 
+                editorCamera.transform.forward().y, editorCamera.transform.forward().z);
         }
         ImGui::End();
 

@@ -70,6 +70,12 @@ void BaseApplication::update(double time) {
 
     glfwPollEvents();
 }
+void BaseApplication::onKeyCallback(int key, int scancode, int action, int mods) {
+
+}
+void BaseApplication::onMouseButtonCallback(int key, int action, int mods) {
+    
+}
 void BaseApplication::onMouseCursorCallback(double xpos, double ypos) {
     
 }

@@ -32,9 +32,9 @@ protected:
     virtual void onResize(GLFWwindow*, int width, int height);
     virtual void onEnd();
 
-    virtual void onKeyCallback(int key, int scancode, int action, int mods) = 0;
+    virtual void onKeyCallback(int key, int scancode, int action, int mods);
 
-    virtual void onMouseButtonCallback(int key, int action, int mods) = 0;
+    virtual void onMouseButtonCallback(int key, int action, int mods);
 
     virtual void onMouseCursorCallback(double xpos, double ypos);
 

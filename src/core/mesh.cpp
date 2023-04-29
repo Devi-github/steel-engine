@@ -72,5 +72,5 @@ void MeshRenderer::draw(GLenum type)
 }
 
 void MeshRenderer::onUpdate() {
-    draw(GL_TRIANGLES);
+    draw(drawType);
 }
