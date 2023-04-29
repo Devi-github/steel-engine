@@ -7,21 +7,9 @@ SteelObject::SteelObject()
     transform = (Transform*)trans;
 }
 
-/*template <class T>
-void SteelObject::addComponent()
-{
-    static_assert(std::is_base_of<BaseComponent, T>::value, "Type must inherit base component class");
-    auto newComponent = (BaseComponent*)new T();
-    newComponent->gameObject = this;
-    components.push_back(newComponent);
-}
-
-template <class T>
-T* SteelObject::getComponent()
-{
-    static_assert(std::is_base_of<BaseComponent, T>::value, "Type must inherit base component class");
-    for(auto component : components) {
-        if(typeid(component) == typeid(T)) return component;
+void SteelObject::tick() {
+    std::map<std::type_index, BaseComponent*>::iterator it;
+    for(it = components.begin(); it != components.end(); it++) {
+        it->second->onUpdate();
     }
-    return nullptr;
-}*/
+}

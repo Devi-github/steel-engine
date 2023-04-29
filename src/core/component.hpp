@@ -7,5 +7,8 @@ class BaseComponent {
 public:
     BaseComponent();
 
+    virtual void onStart();
+    virtual void onUpdate();
+
     //SteelObject* gameObject;
 };

@@ -4,3 +4,11 @@ BaseComponent::BaseComponent()
 {
     
 }
+
+void BaseComponent::onUpdate()
+{
+}
+
+void BaseComponent::onStart()
+{
+}

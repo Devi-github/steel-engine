@@ -60,7 +60,7 @@ void BaseApplication::init() {
 void BaseApplication::update(double time) {
     glfwPollEvents();
 }
-void BaseApplication::run() {
+int BaseApplication::run() {
     init();
     glfwSetTime(0);
     double time = 0;
@@ -75,6 +75,7 @@ void BaseApplication::run() {
         time = glfwGetTime();
     }
     onEnd();
+    return exitCode;
 }
 
 void BaseApplication::render(double time) {
@@ -97,8 +98,9 @@ bool BaseApplication::getMouseButton(int key) {
     return glfwGetMouseButton(window, key);
 }
 
-void BaseApplication::stop() {
+void BaseApplication::stop(int exitCode) {
     glfwSetWindowShouldClose(window, 1);
+    this->exitCode = exitCode;
 }
 
 void BaseApplication::onResize(GLFWwindow* w, int wid, int hei) {

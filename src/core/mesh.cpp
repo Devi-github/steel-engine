@@ -61,3 +61,7 @@ void MeshRenderer::draw(GLenum type)
     glBindVertexArray(vao);
     glDrawElements(type, mesh->vertexCount, GL_UNSIGNED_INT, 0);
 }
+
+void MeshRenderer::onUpdate() {
+    draw(GL_TRIANGLES);
+}

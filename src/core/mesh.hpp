@@ -21,6 +21,7 @@ public:
     ~MeshRenderer();
 
     void setMesh(Mesh* mesh);
+    void onUpdate() override;
     void draw(GLenum primitiveType);
 
     Material* material;

@@ -7,11 +7,11 @@ public:
     // Creates a glfw window
     BaseApplication(int width, int height, const char* title);
     // Runs the application
-    void run();
+    int run();
 
     double getTime();
     // Stops the application
-    void stop();
+    void stop(int exitCode = 0);
 public:
     int Width, Height;
 protected:
@@ -38,4 +38,6 @@ protected:
     bool wireframeMode = false;
 private:
     GLFWwindow* window;
+
+    int exitCode = 0;
 };
