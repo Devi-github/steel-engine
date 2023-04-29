@@ -1,13 +1,17 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <typeindex>
+
 #include "component.hpp"
 #include "components/transform.hpp"
-#include <typeindex>
 
 class SteelObject final {
 public:
     SteelObject();
+
+    // Max name size: 128 characters
+    char name[128];
 
     Transform transform;
 

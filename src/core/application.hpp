@@ -12,6 +12,8 @@ public:
     static BaseApplication* instance;
     static BaseApplication& getInstance();
 
+    void setCursorMode(int mode);
+
     BaseApplication(BaseApplication& other) = delete;
     void operator=(const BaseApplication&) = delete;
 
@@ -34,7 +36,7 @@ protected:
 
     virtual void onMouseButtonCallback(int key, int action, int mods) = 0;
 
-    virtual void onMouseCursorCallback(double xpos, double ypos) = 0;
+    virtual void onMouseCursorCallback(double xpos, double ypos);
 
     void swapBuffers();
 
@@ -43,8 +45,12 @@ protected:
     bool getMouseButton(int key);
     
     bool wireframeMode = false;
+
+    double mouseX, mouseY;
+    double deltaMouseX, deltaMouseY;
 private:
     GLFWwindow* window;
 
     int exitCode = 0;
+    double prevMouseX, prevMouseY;
 };

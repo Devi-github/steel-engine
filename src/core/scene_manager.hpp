@@ -8,6 +8,7 @@ public:
 
     void tick();
     void addObject(SteelObject*);
+    void removeObject(SteelObject*);
 
 public:
     std::vector<SteelObject*> objects;

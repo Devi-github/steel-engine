@@ -15,9 +15,7 @@ Camera::~Camera()
 
 glm::mat4 Camera::viewMatrix()
 {
-    glm::vec3 model = glm::vec4(0, 0, 1, 1) * glm::eulerAngleXYZ(transform.rotation.x, transform.rotation.y, transform.rotation.z);
-
-    return glm::lookAt(transform.position, transform.position + model, glm::vec3(0, 1, 0));
+    return glm::lookAt(transform.position, transform.position + transform.forward(), glm::vec3(0, 1, 0));
 }
 
 glm::mat4 Camera::projectionMatrix()

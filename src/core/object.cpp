@@ -1,7 +1,10 @@
 #include "object.hpp"
+#include <cstring>
 
 SteelObject::SteelObject()
 {
+    strcpy(name, "SteelGameObject");
+    
     components.insert({typeid(Transform), (BaseComponent*)(&transform)});
     transform.steelObject = (void*)this;
 }

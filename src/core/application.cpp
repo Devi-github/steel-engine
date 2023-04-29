@@ -60,7 +60,18 @@ void BaseApplication::init() {
 
 }
 void BaseApplication::update(double time) {
+    glfwGetCursorPos(window, &mouseX, &mouseY);
+
+    deltaMouseX = mouseX - prevMouseX;
+    deltaMouseY = mouseY - prevMouseY;
+    
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+
     glfwPollEvents();
+}
+void BaseApplication::onMouseCursorCallback(double xpos, double ypos) {
+    
 }
 int BaseApplication::run() {
     init();
@@ -83,6 +94,11 @@ int BaseApplication::run() {
 BaseApplication &BaseApplication::getInstance()
 {
     return *BaseApplication::instance;
+}
+
+void BaseApplication::setCursorMode(int mode)
+{
+    glfwSetInputMode(window, GLFW_CURSOR, mode);
 }
 
 void BaseApplication::render(double time) {
