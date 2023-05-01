@@ -12,14 +12,11 @@
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 #include <string>
-
-Scene* currentScene = nullptr;
-
 class SteelMain final : public BaseApplication {
 public:
     SteelMain(int w, int h) :
     BaseApplication(w, h, "Steel Engine") {
-        currentScene = nullptr;
+        Scene::currentScene = nullptr;
     }
 
 private:
@@ -30,6 +27,8 @@ private:
     Camera editorCamera;
 
     SteelObject* chosenGameObject = nullptr;
+
+    Material* mainMaterial;
 
     bool loaded = false;
 
@@ -66,11 +65,14 @@ private:
 
         scene.addObject(obj);
 
+        mainMaterial = Material::Default();
+        mainMaterial->uniform3("objectColor", glm::vec3(1, 0.2, 0.2));
+
         auto renderer = obj->addComponent<MeshRenderer>();
         renderer->setMesh(mesh);
-        renderer->material = Material::Default();
+        renderer->sharedMaterial = mainMaterial;
 
-        currentScene = &scene;
+        Scene::currentScene = &scene;
 
         Camera::currentCamera = &editorCamera;
     }
@@ -117,32 +119,7 @@ private:
                 chosenGameObject = nullptr;
             }
             if(ImGui::MenuItem("Duplicate", "CTRL+D", false, chosenGameObject != nullptr)) {
-                float vbuf[] = {
-                    -0.5, -0.5, 0, 0, 0, -1, 0, 0,
-                    0.5, -0.5, 0, 0, 0, -1, 1, 0,
-                    0, 0.5, 0, 0, 0, -1, 0.5, 1,
-                    0.8, 0.5, 0, 0, 0, -1, 0.9, 1,
-                };
-                GLuint indices[] = {
-                    0, 1, 2,
-                    1, 3, 2
-                };
-
-                Mesh* mesh = new Mesh(vbuf, indices, sizeof(indices) / sizeof(GLuint));
-
-                SteelObject* obj = new SteelObject();
-
-                obj->transform.position = chosenGameObject->transform.position;
-                obj->transform.rotation = chosenGameObject->transform.rotation;
-                obj->transform.scale = chosenGameObject->transform.scale;
-                
-                if(strlen(obj->name) < 128 - 8)
-                    sprintf(obj->name, "%s (Copy)", obj->name);
-                scene.addObject(obj);
-
-                auto renderer = obj->addComponent<MeshRenderer>();
-                renderer->setMesh(mesh);
-                renderer->material = Material::Default();
+                duplicate();
             }
             ImGui::EndMenu();
         }
@@ -170,10 +147,16 @@ private:
 
                     auto renderer = obj->addComponent<MeshRenderer>();
                     renderer->setMesh(mesh);
-                    renderer->material = Material::Default();
+                    renderer->sharedMaterial = mainMaterial;
+
+                    chosenGameObject = obj;
                 }
                 ImGui::EndMenu();
             }
+            ImGui::EndMenu();
+        }
+        if(ImGui::BeginMenu("View", true)) {
+            ImGui::Checkbox("Wireframe Mode", &wireframeMode);
             ImGui::EndMenu();
         }
         if(ImGui::BeginMenu("Window", false)) {
@@ -182,8 +165,40 @@ private:
 
         ImGui::EndMainMenuBar();
     }
+    void duplicate() {
+        if(chosenGameObject == nullptr) return;
+
+        float vbuf[] = {
+            -0.5, -0.5, 0, 0, 0, -1, 0, 0,
+            0.5, -0.5, 0, 0, 0, -1, 1, 0,
+            0, 0.5, 0, 0, 0, -1, 0.5, 1,
+            0.8, 0.5, 0, 0, 0, -1, 0.9, 1,
+        };
+        GLuint indices[] = {
+            0, 1, 2,
+            1, 3, 2
+        };
+
+        Mesh* mesh = new Mesh(vbuf, indices, sizeof(indices) / sizeof(GLuint));
+
+        SteelObject* obj = new SteelObject();
+
+        obj->transform.position = chosenGameObject->transform.position;
+        obj->transform.rotation = chosenGameObject->transform.rotation;
+        obj->transform.scale = chosenGameObject->transform.scale;
+        
+        if(strlen(chosenGameObject->name) < 128 - 8)
+            sprintf(obj->name, "%s (Copy)", chosenGameObject->name);
+        scene.addObject(obj);
+
+        auto renderer = obj->addComponent<MeshRenderer>();
+        renderer->setMesh(mesh);
+        renderer->sharedMaterial = mainMaterial;
+
+        chosenGameObject = obj;
+    }
     void render_object_list() {
-        if(currentScene != nullptr) {
+        if(Scene::currentScene != nullptr) {
             ImGui::Begin("Object list");
 
             ImGui::BeginListBox("##");
@@ -202,7 +217,7 @@ private:
             ImGui::End();
         }
     }
-    void render_ui() {
+    void render_ui(double time) {
         imgui_newframe();
 
         render_main_bar();
@@ -211,6 +226,13 @@ private:
 
         Transform& objtrans = chosenGameObject->transform;
         
+        ImGui::Begin("Statistics");
+    
+        ImGui::Text("FPS: %f", 1 / time);
+        ImGui::Text("Delta: %fms", time * 1000);
+
+        ImGui::End();
+
         ImGui::Begin("Object information");
         if(chosenGameObject != nullptr) {
             ImGui::InputText("Name", chosenGameObject->name, 128);
@@ -235,15 +257,15 @@ private:
     void render(double time) override {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if(currentScene == nullptr && !loaded) {
+        if(Scene::currentScene == nullptr && !loaded) {
             std::cerr << "No scene loaded" << std::endl;
             stop(1);
             return;
         }
 
-        currentScene->tick();
+        Scene::currentScene->tick();
 
-        render_ui();
+        render_ui(time);
 
         check_wireframe();
         swapBuffers();
@@ -259,6 +281,11 @@ private:
                 chosenGameObject = nullptr;
             }
         }
+        if(k == GLFW_KEY_D && a == GLFW_PRESS && m == GLFW_MOD_CONTROL) {
+            duplicate();
+        }
+        if(k == GLFW_KEY_D && a == GLFW_PRESS && m == (GLFW_MOD_CONTROL | GLFW_MOD_SHIFT))
+            chosenGameObject = nullptr;
     }
     void onMouseButtonCallback(int k, int a, int m) override {
 

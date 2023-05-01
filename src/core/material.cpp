@@ -44,14 +44,61 @@ void Material::loadShaders(const char *vertex, const char *fragment)
     glDetachShader(program, fg);
     glDeleteShader(vx);
     glDeleteShader(fg);
+
+    int numberOfUniforms;
+    glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numberOfUniforms);
+
+    for(int i = 0; i < numberOfUniforms; i++) {
+        char name[32];
+        MaterialProperty prop;
+        GLsizei size, length;
+        glGetActiveUniform(program, i, 32, &length, &size, &prop.type, name);
+        prop.location = glGetUniformLocation(program, name);
+
+        std::string rlname = name;
+
+        uniformLocationMap.insert({rlname, prop});
+    }
 }
 
-void Material::uniform4x4(const char* name, glm::mat4 matrix) {
+void Material::uniform1(const char *name, float value)
+{
+    use();
+    glUniform1f(getLocation(name), value);
+}
+
+void Material::uniform1(const char *name, int value)
+{
+    use();
+    glUniform1i(getLocation(name), value);
+}
+
+void Material::uniform1(const char *name, GLuint value)
+{
+    use();
+    glUniform1ui(getLocation(name), value);
+}
+
+void Material::uniform1(const char *name, double value)
+{
+    use();
+    glUniform1d(getLocation(name), value);
+}
+
+void Material::uniform3(const char *name, glm::vec3 vector)
+{
+    use();
+    glUniform3fv(getLocation(name), 1, (float*)&vector);
+}
+
+void Material::uniform4x4(const char *name, glm::mat4 matrix)
+{
+    use();
     glUniformMatrix4fv(getLocation(name), 1, true, (float*)&matrix);
 }
 
 GLuint Material::getLocation(const char* name) {
-    return glGetUniformLocation(program, name);
+    return uniformLocationMap[name].location;
 }
 
 // TODO: Add error checking

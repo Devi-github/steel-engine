@@ -11,6 +11,7 @@ set(SOURCE_FILES main.cpp steel.hpp
     core/object.cpp core/component.cpp
     core/components/transform.cpp
     core/material.cpp gameengine/camera.cpp
+    gameengine/lighting.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
