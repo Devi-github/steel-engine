@@ -24,7 +24,7 @@ public:
     void onUpdate() override;
     void draw(GLenum primitiveType);
 
-    Material* material;
+    Material* sharedMaterial;
 
     int drawType = GL_TRIANGLES;
     

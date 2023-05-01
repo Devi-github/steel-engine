@@ -57,7 +57,7 @@ double BaseApplication::getTime() {
     return glfwGetTime();
 }
 void BaseApplication::init() {
-
+    glEnable(GL_MULTISAMPLE);
 }
 void BaseApplication::update(double time) {
     glfwGetCursorPos(window, &mouseX, &mouseY);

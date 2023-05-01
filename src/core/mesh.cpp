@@ -1,6 +1,7 @@
 #include "mesh.hpp"
 #include "../gameengine/camera.hpp"
 #include "object.hpp"
+#include "scene_manager.hpp"
 
 Mesh::Mesh() {
 
@@ -58,13 +59,18 @@ void MeshRenderer::setMesh(Mesh* mesh)
 
 void MeshRenderer::draw(GLenum type)
 {
-    material->use();
+    if(Scene::currentScene == nullptr || Camera::currentCamera == nullptr) return;
+
+    sharedMaterial->use();
 
     auto model = ((SteelObject*)steelObject)->transform.modelMatrix();
 
-    material->uniform4x4("model", model);
-    material->uniform4x4("view", Camera::currentCamera->viewMatrix());
-    material->uniform4x4("projection", Camera::currentCamera->projectionMatrix());
+    sharedMaterial->uniform4x4("model", model);
+    sharedMaterial->uniform4x4("view", Camera::currentCamera->viewMatrix());
+    sharedMaterial->uniform4x4("projection", Camera::currentCamera->projectionMatrix());
+    sharedMaterial->uniform3("lightDirection", Scene::currentScene->light.direction);
+    sharedMaterial->uniform3("lightColor", Scene::currentScene->light.color);
+    sharedMaterial->uniform1("lightIntensity", Scene::currentScene->light.intensity);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBindVertexArray(vao);
