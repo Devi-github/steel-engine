@@ -51,6 +51,11 @@ BaseApplication::BaseApplication(int w, int h, const char* title) {
     };
     glfwSetCursorPosCallback(window, mouseCursorCall);
 
+    auto mouseWheelCall = [](GLFWwindow* w, double xoff, double yoff) {
+        static_cast<BaseApplication*>(glfwGetWindowUserPointer(w))->onMouseWheelCallback(xoff, yoff);
+    };
+    glfwSetScrollCallback(window, mouseWheelCall);
+
     initialize_imgui(window);
 }
 double BaseApplication::getTime() {
@@ -79,7 +84,12 @@ void BaseApplication::onMouseButtonCallback(int key, int action, int mods) {
 void BaseApplication::onMouseCursorCallback(double xpos, double ypos) {
     
 }
-int BaseApplication::run() {
+void BaseApplication::onMouseWheelCallback(double xoffset, double yoffset)
+{
+    
+}
+int BaseApplication::run()
+{
     init();
     glfwSetTime(0);
     double time = 0;

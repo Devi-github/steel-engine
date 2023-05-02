@@ -25,6 +25,7 @@ private:
     Scene scene;
 
     Camera editorCamera;
+    float cameraSpeed = 0.1f;
 
     SteelObject* chosenGameObject = nullptr;
 
@@ -90,16 +91,16 @@ private:
         editorCamera.transform.rotate(glm::vec3(-glm::radians(deltaMouseY) * 0.1, glm::radians(deltaMouseX) * 0.1, 0));
 
         if(getKey(GLFW_KEY_W)) {
-            editorCamera.transform.position += editorCamera.transform.forward() * 0.1f;
+            editorCamera.transform.position += editorCamera.transform.forward() * cameraSpeed;
         }
         if(getKey(GLFW_KEY_S)) {
-            editorCamera.transform.position -= editorCamera.transform.forward() * 0.1f;
+            editorCamera.transform.position -= editorCamera.transform.forward() * cameraSpeed;
         }
         if(getKey(GLFW_KEY_A)) {
-            editorCamera.transform.position -= editorCamera.transform.right() * 0.1f;
+            editorCamera.transform.position -= editorCamera.transform.right() * cameraSpeed;
         }
         if(getKey(GLFW_KEY_D)) {
-            editorCamera.transform.position += editorCamera.transform.right() * 0.1f;
+            editorCamera.transform.position += editorCamera.transform.right() * cameraSpeed;
         }
     }
     void render_main_bar() {
@@ -249,6 +250,7 @@ private:
                 editorCamera.transform.position.y, editorCamera.transform.position.z);
             ImGui::Text("Look Direction: X: %f Y: %f Z: %f", editorCamera.transform.forward().x, 
                 editorCamera.transform.forward().y, editorCamera.transform.forward().z);
+            ImGui::DragFloat("Camera Speed", &cameraSpeed, 0.05f, 0.02f, 100.0f);
         }
         ImGui::End();
 
@@ -288,9 +290,16 @@ private:
             chosenGameObject = nullptr;
     }
     void onMouseButtonCallback(int k, int a, int m) override {
-
+        BaseApplication::onMouseButtonCallback(k, a, m);
     }
     void onMouseCursorCallback(double xpos, double ypos) override {
         BaseApplication::onMouseCursorCallback(xpos, ypos);
+    }
+    void onMouseWheelCallback(double xoffset, double yoffset) override {
+        if(getMouseButton(1)) {
+            cameraSpeed += yoffset * 0.1f;
+            cameraSpeed = cameraSpeed < 0.02f ? 0.02 : cameraSpeed;
+        }
+        BaseApplication::onMouseWheelCallback(xoffset, yoffset);
     }
 };

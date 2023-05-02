@@ -38,6 +38,8 @@ protected:
 
     virtual void onMouseCursorCallback(double xpos, double ypos);
 
+    virtual void onMouseWheelCallback(double xoffset, double yoffset);
+
     void swapBuffers();
 
     bool getKey(int key);
