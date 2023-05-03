@@ -8,7 +8,7 @@ Mesh::Mesh() {
 }
 Mesh::Mesh(float *buffer, GLuint* indbuff, int vxCount)
 {
-    vertexSize = 8;
+    vertexSize = VERTEX_SIZE;
 
     vertexBuffer = buffer;
     vertexCount = vxCount;
@@ -63,9 +63,11 @@ void MeshRenderer::draw(GLenum type)
 
     sharedMaterial->use();
 
-    auto model = ((SteelObject*)steelObject)->transform.modelMatrix();
+    auto model = steelObject->transform.modelMatrix();
+    auto normMat = steelObject->transform.normalMatrix();
 
     sharedMaterial->uniform4x4("model", model);
+    sharedMaterial->uniform4x4("normalMatrix", normMat);
     sharedMaterial->uniform4x4("view", Camera::currentCamera->viewMatrix());
     sharedMaterial->uniform4x4("projection", Camera::currentCamera->projectionMatrix());
     sharedMaterial->uniform3("lightDirection", Scene::currentScene->light.direction);

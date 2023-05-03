@@ -1,4 +1,5 @@
 #include "component.hpp"
+#include "object.hpp"
 
 BaseComponent::BaseComponent()
 {

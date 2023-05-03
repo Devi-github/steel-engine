@@ -1,4 +1,5 @@
 #include "object.hpp"
+#include "component.hpp"
 #include <cstring>
 
 SteelObject::SteelObject()
@@ -6,7 +7,7 @@ SteelObject::SteelObject()
     strcpy(name, "SteelGameObject");
     
     components.insert({typeid(Transform), (BaseComponent*)(&transform)});
-    transform.steelObject = (void*)this;
+    transform.steelObject = this;
 }
 
 void SteelObject::tick() {

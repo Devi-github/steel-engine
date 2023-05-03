@@ -3,6 +3,8 @@
 #include "component.hpp"
 #include "material.hpp"
 
+#define VERTEX_SIZE 8
+
 struct Mesh {
 public:
     Mesh();
@@ -28,7 +30,7 @@ public:
 
     int drawType = GL_TRIANGLES;
     
-private:
     Mesh* mesh;
+private:
     GLuint vbo, vao, ebo;
 };

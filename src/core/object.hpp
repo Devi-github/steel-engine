@@ -3,8 +3,9 @@
 #include <map>
 #include <typeindex>
 
-#include "component.hpp"
 #include "components/transform.hpp"
+
+class BaseComponent;
 
 class SteelObject final {
 public:
@@ -21,7 +22,7 @@ public:
     T* addComponent() {
         static_assert(std::is_base_of<BaseComponent, T>::value, "Type must inherit base component class");
         auto newComponent = (BaseComponent*)new T();
-        newComponent->steelObject = (void*)this;
+        newComponent->steelObject = this;
         components.insert({typeid(T), newComponent});
         return (T*)newComponent;
     }

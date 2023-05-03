@@ -1,7 +1,7 @@
 #pragma once
 //#include "object.hpp"
 
-//class SteelObject;
+class SteelObject;
 
 class BaseComponent {
 public:
@@ -10,5 +10,5 @@ public:
     virtual void onStart();
     virtual void onUpdate();
 
-    void* steelObject;
+    SteelObject* steelObject;
 };
