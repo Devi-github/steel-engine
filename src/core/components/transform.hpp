@@ -5,8 +5,12 @@
 class Transform : public BaseComponent {
 public:
     Transform();
+    Transform(const Transform& other);
+
+    void copyTransform(Transform& other);
 
     glm::mat4 modelMatrix();
+    glm::mat4 normalMatrix();
 
     void rotate(glm::vec3 euler);
     glm::vec3 forward();

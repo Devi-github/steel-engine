@@ -17,8 +17,10 @@ public:
 
     Transform transform;
 
+    float fieldOfView = 1;
+
     float nearClipPlane = 0.1, farClipPlane = 1000;
 
     // Field of view in radians
-    float fov = glm::quarter_pi<float>();
+    float fov = glm::pi<float>() / 3;
 };

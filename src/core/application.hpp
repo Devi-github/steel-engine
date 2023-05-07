@@ -45,13 +45,20 @@ protected:
     bool getKey(int key);
 
     bool getMouseButton(int key);
+
+    void updateTitle();
     
     bool wireframeMode = false;
 
     double mouseX, mouseY;
     double deltaMouseX, deltaMouseY;
+
+    char title[200]; // Max 200 characters
 private:
     GLFWwindow* window;
+
+    double currentDelay = 0;
+    double setTitleDelay = 0.1;
 
     int exitCode = 0;
     double prevMouseX, prevMouseY;

@@ -18,6 +18,8 @@ public:
 
     void tick();
 
+    SteelObject* duplicate();
+
     template <class T>
     T* addComponent() {
         static_assert(std::is_base_of<BaseComponent, T>::value, "Type must inherit base component class");

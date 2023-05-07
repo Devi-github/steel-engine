@@ -6,6 +6,7 @@ class SteelObject;
 class BaseComponent {
 public:
     BaseComponent();
+    BaseComponent(const BaseComponent&);
 
     virtual void onStart();
     virtual void onUpdate();

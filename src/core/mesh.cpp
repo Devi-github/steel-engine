@@ -10,13 +10,26 @@ Mesh::Mesh(float *buffer, GLuint* indbuff, int vxCount)
 {
     vertexSize = VERTEX_SIZE;
 
-    vertexBuffer = buffer;
+    vertexBuffer = (float*)malloc(vxCount * VERTEX_SIZE * sizeof(float));
+    indices = (GLuint*)malloc(vxCount * sizeof(GLuint));
     vertexCount = vxCount;
-    indices = indbuff;
+    memcpy(vertexBuffer, buffer, vxCount * VERTEX_SIZE * sizeof(float));
+    memcpy(indices, indbuff, vxCount * sizeof(GLuint));
 }
-Mesh::~Mesh() {
-    delete vertexBuffer;
-    delete indices;
+Mesh::Mesh(const Mesh &mesh)
+{
+    vertexSize = VERTEX_SIZE;
+
+    vertexBuffer = (float*)malloc(mesh.vertexCount * VERTEX_SIZE * sizeof(float));
+    indices = (GLuint*)malloc(mesh.vertexCount * sizeof(GLuint));
+    vertexCount = mesh.vertexCount;
+    memcpy(vertexBuffer, mesh.vertexBuffer, mesh.vertexCount * VERTEX_SIZE * sizeof(float));
+    memcpy(indices, mesh.indices, mesh.vertexCount * sizeof(GLuint));
+}
+Mesh::~Mesh()
+{
+    free(vertexBuffer);
+    free(indices);
 }
 
 MeshRenderer::MeshRenderer() {
@@ -25,6 +38,14 @@ MeshRenderer::MeshRenderer() {
     glGenVertexArrays(1, &vao);
 }
 
+MeshRenderer::MeshRenderer(const MeshRenderer &other) : BaseComponent(other)
+{
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+    glGenVertexArrays(1, &vao);
+
+    setMesh(other.mesh);
+}
 MeshRenderer::~MeshRenderer()
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -38,7 +59,7 @@ MeshRenderer::~MeshRenderer()
 
 void MeshRenderer::setMesh(Mesh* mesh)
 {
-    this->mesh = mesh;
+    this->mesh = new Mesh(mesh->vertexBuffer, mesh->indices, mesh->vertexCount);
 
     glBindVertexArray(vao);
 
@@ -59,7 +80,7 @@ void MeshRenderer::setMesh(Mesh* mesh)
 
 void MeshRenderer::draw(GLenum type)
 {
-    if(Scene::currentScene == nullptr || Camera::currentCamera == nullptr) return;
+    if(Scene::currentScene == nullptr || Camera::currentCamera == nullptr || sharedMaterial == nullptr) return;
 
     sharedMaterial->use();
 

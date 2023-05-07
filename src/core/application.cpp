@@ -63,6 +63,8 @@ double BaseApplication::getTime() {
 }
 void BaseApplication::init() {
     glEnable(GL_MULTISAMPLE);
+
+    glfwSetWindowTitle(window, title);
 }
 void BaseApplication::update(double time) {
     glfwGetCursorPos(window, &mouseX, &mouseY);
@@ -72,6 +74,8 @@ void BaseApplication::update(double time) {
     
     prevMouseX = mouseX;
     prevMouseY = mouseY;
+
+    currentDelay -= time;
 
     glfwPollEvents();
 }
@@ -135,6 +139,14 @@ bool BaseApplication::getKey(int key) {
 
 bool BaseApplication::getMouseButton(int key) {
     return glfwGetMouseButton(window, key);
+}
+
+void BaseApplication::updateTitle()
+{
+    if(currentDelay > 0) return;
+
+    glfwSetWindowTitle(window, title);
+    currentDelay = setTitleDelay;
 }
 
 void BaseApplication::stop(int exitCode) {

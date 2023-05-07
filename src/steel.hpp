@@ -5,6 +5,8 @@
 #include "core/object.hpp"
 #include "core/scene_manager.hpp"
 #include "gameengine/camera.hpp"
+#include "gameengine/primitives.hpp"
+#include "core/shader.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,10 +14,12 @@
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 #include <string>
+
 class SteelMain final : public BaseApplication {
 public:
     SteelMain(int w, int h) :
     BaseApplication(w, h, "Steel Engine") {
+        sprintf(title, "Steel Engine | %dx%d | OGL %s", Width, Height, glGetString(GL_VERSION));
         Scene::currentScene = nullptr;
     }
 
@@ -49,29 +53,9 @@ private:
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
 
-        float vbuf[] = {
-            -0.5, -0.5, 0, 0, 0, -1, 0, 0,
-            0.5, -0.5, 0, 0, 0, -1, 1, 0,
-            0, 0.5, 0, 0, 0, -1, 0.5, 1,
-            0.8, 0.5, 0, 0, 0, -1, 0.9, 1,
-        };
-        GLuint indices[] = {
-            0, 1, 2,
-            1, 3, 2
-        };
-
-        Mesh* mesh = new Mesh(vbuf, indices, sizeof(indices) / sizeof(GLuint));
-
-        SteelObject* obj = new SteelObject();
-
-        scene.addObject(obj);
-
         mainMaterial = Material::Default();
+        mainMaterial->use();
         mainMaterial->uniform3("objectColor", glm::vec3(1, 0.2, 0.2));
-
-        auto renderer = obj->addComponent<MeshRenderer>();
-        renderer->setMesh(mesh);
-        renderer->sharedMaterial = mainMaterial;
 
         Scene::currentScene = &scene;
 
@@ -124,6 +108,7 @@ private:
             }
             ImGui::EndMenu();
         }
+// FIXME: I don't know why, but creating new objects usually overwrites a previously created object's mesh
         if(ImGui::BeginMenu("SteelObject")) {
             if(ImGui::BeginMenu("Create Object")) {
                 if(ImGui::MenuItem("New Test")) {
@@ -152,6 +137,32 @@ private:
 
                     chosenGameObject = obj;
                 }
+                if(ImGui::MenuItem("New Cube")) {
+                    SteelObject* obj = new SteelObject();
+                    
+                    strcpy(obj->name, "New Cube");
+
+                    scene.addObject(obj);
+
+                    auto renderer = obj->addComponent<MeshRenderer>();
+                    renderer->setMesh(constructMesh(Primitives::CUBE));
+                    renderer->sharedMaterial = mainMaterial;
+
+                    chosenGameObject = obj;
+                }
+                if(ImGui::MenuItem("New Plane")) {
+                    SteelObject* obj = new SteelObject();
+                    
+                    strcpy(obj->name, "New Plane");
+
+                    scene.addObject(obj);
+
+                    auto renderer = obj->addComponent<MeshRenderer>();
+                    renderer->setMesh(constructMesh(Primitives::PLANE));
+                    renderer->sharedMaterial = mainMaterial;
+
+                    chosenGameObject = obj;
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();
@@ -169,32 +180,8 @@ private:
     void duplicate() {
         if(chosenGameObject == nullptr) return;
 
-        float vbuf[] = {
-            -0.5, -0.5, 0, 0, 0, -1, 0, 0,
-            0.5, -0.5, 0, 0, 0, -1, 1, 0,
-            0, 0.5, 0, 0, 0, -1, 0.5, 1,
-            0.8, 0.5, 0, 0, 0, -1, 0.9, 1,
-        };
-        GLuint indices[] = {
-            0, 1, 2,
-            1, 3, 2
-        };
-
-        Mesh* mesh = new Mesh(vbuf, indices, sizeof(indices) / sizeof(GLuint));
-
-        SteelObject* obj = new SteelObject();
-
-        obj->transform.position = chosenGameObject->transform.position;
-        obj->transform.rotation = chosenGameObject->transform.rotation;
-        obj->transform.scale = chosenGameObject->transform.scale;
-        
-        if(strlen(chosenGameObject->name) < 128 - 8)
-            sprintf(obj->name, "%s (Copy)", chosenGameObject->name);
-        scene.addObject(obj);
-
-        auto renderer = obj->addComponent<MeshRenderer>();
-        renderer->setMesh(mesh);
-        renderer->sharedMaterial = mainMaterial;
+        SteelObject* obj = chosenGameObject->duplicate();
+        Scene::currentScene->addObject(obj);
 
         chosenGameObject = obj;
     }
@@ -244,6 +231,24 @@ private:
         }
         ImGui::End();
 
+        ImGui::Begin("Mesh renderer");
+        if(chosenGameObject != nullptr) {
+            MeshRenderer* mr = chosenGameObject->getComponent<MeshRenderer>();
+            if(mr != nullptr) {
+                ImGui::Text("Mesh renderer found at %p", mr);
+                ImGui::Text("VBO: %u VAO: %u EBO: %u", mr->vbo, mr->vao, mr->ebo);
+                ImGui::Text("Mesh renderer mesh is at: %p", mr->mesh);
+                ImGui::Text("Mesh vertex buffer is at: %p", mr->mesh->vertexBuffer);
+                ImGui::Text("Mesh element buffer is at: %p", mr->mesh->indices);
+                ImGui::Text("Vertices: %d", mr->mesh->vertexCount);
+                ImGui::Text("Shared material is at: %p", mr->sharedMaterial);
+
+            } else {
+                ImGui::Text("No mesh renderer component found!");
+            }
+        }
+        ImGui::End();
+
         ImGui::Begin("Camera");
         if(Camera::currentCamera != nullptr) {
             ImGui::Text("Position: X: %f Y: %f Z: %f", editorCamera.transform.position.x, 
@@ -275,6 +280,12 @@ private:
     }
     void onEnd() override {
         BaseApplication::onEnd();
+    }
+    void onResize(GLFWwindow* window, int width, int height) override {
+        BaseApplication::onResize(window, width, height);
+
+        sprintf(title, "Steel Engine | %dx%d | OGL %s", Width, Height, glGetString(GL_VERSION));
+        updateTitle();
     }
     void onKeyCallback(int k, int sc, int a, int m) override {
         if(k == GLFW_KEY_DELETE && a == GLFW_PRESS) {

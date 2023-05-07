@@ -5,9 +5,26 @@
 Transform::Transform() {
 }
 
+Transform::Transform(const Transform &other) : BaseComponent(other)
+{
+    position = other.position;
+    rotation = other.rotation;
+    scale = other.scale;
+}
+
+void Transform::copyTransform(Transform &other)
+{
+    position = other.position;
+    rotation = other.rotation;
+    scale = other.scale;
+}
+
 glm::mat4 Transform::modelMatrix()
 {
-    return glm::mat4(1) * glm::translate(position) * glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z) * glm::scale(scale);
+    return glm::translate(position) * glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z) * glm::scale(scale);
+}
+glm::mat4 Transform::normalMatrix() {
+    return glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
 }
 
 void Transform::rotate(glm::vec3 euler)
