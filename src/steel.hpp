@@ -37,6 +37,9 @@ private:
 
     bool loaded = false;
 
+    int allVertices = 0;
+    int allFaces = 0;
+
 private:
     void check_wireframe() {
         if(wireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -45,7 +48,7 @@ private:
     void init() override {
         BaseApplication::init();
 
-        editorCamera.transform.position = glm::vec3(0, 0, 4);
+        editorCamera.transform.position = glm::vec3(0, 1, 4);
         editorCamera.transform.rotation = glm::vec3(0, glm::pi<float>(), 0);
 
         glClearColor(0.3, 0.7, 1, 1);
@@ -63,6 +66,17 @@ private:
     }
     void update(double time) override {
         BaseApplication::update(time);
+
+        allVertices = 0;
+        allFaces = 0;
+
+        for(auto object : Scene::currentScene->objects) {
+            auto renderer = object->getComponent<MeshRenderer>();
+            if(renderer != nullptr) {
+                allVertices += renderer->mesh->vertexCount;
+                allFaces += renderer->mesh->facesCount;
+            }
+        }
 
         if(getMouseButton(1)) {
             setCursorMode(GLFW_CURSOR_DISABLED);
@@ -111,32 +125,6 @@ private:
 // FIXME: I don't know why, but creating new objects usually overwrites a previously created object's mesh
         if(ImGui::BeginMenu("SteelObject")) {
             if(ImGui::BeginMenu("Create Object")) {
-                if(ImGui::MenuItem("New Test")) {
-                    float vbuf[] = {
-                        -0.5, -0.5, 0, 0, 0, -1, 0, 0,
-                        0.5, -0.5, 0, 0, 0, -1, 1, 0,
-                        0, 0.5, 0, 0, 0, -1, 0.5, 1,
-                        0.8, 0.5, 0, 0, 0, -1, 0.9, 1,
-                    };
-                    GLuint indices[] = {
-                        0, 1, 2,
-                        1, 3, 2
-                    };
-
-                    Mesh* mesh = new Mesh(vbuf, indices, sizeof(indices) / sizeof(GLuint));
-
-                    SteelObject* obj = new SteelObject();
-                    
-                    strcpy(obj->name, "New Steel Object");
-
-                    scene.addObject(obj);
-
-                    auto renderer = obj->addComponent<MeshRenderer>();
-                    renderer->setMesh(mesh);
-                    renderer->sharedMaterial = mainMaterial;
-
-                    chosenGameObject = obj;
-                }
                 if(ImGui::MenuItem("New Cube")) {
                     SteelObject* obj = new SteelObject();
                     
@@ -236,16 +224,22 @@ private:
             MeshRenderer* mr = chosenGameObject->getComponent<MeshRenderer>();
             if(mr != nullptr) {
                 ImGui::Text("Mesh renderer found at %p", mr);
-                ImGui::Text("VBO: %u VAO: %u EBO: %u", mr->vbo, mr->vao, mr->ebo);
+                ImGui::Text("VBO: %u VAO: %u EBO: %u", mr->mesh->vbo, mr->mesh->vao, mr->mesh->ebo);
                 ImGui::Text("Mesh renderer mesh is at: %p", mr->mesh);
                 ImGui::Text("Mesh vertex buffer is at: %p", mr->mesh->vertexBuffer);
                 ImGui::Text("Mesh element buffer is at: %p", mr->mesh->indices);
                 ImGui::Text("Vertices: %d", mr->mesh->vertexCount);
                 ImGui::Text("Shared material is at: %p", mr->sharedMaterial);
-
             } else {
                 ImGui::Text("No mesh renderer component found!");
             }
+        }
+        ImGui::End();
+
+        ImGui::Begin("Rendering info");
+        if(Scene::currentScene != nullptr) {
+            ImGui::Text("Vertices: %d", allVertices);
+            ImGui::Text("Faces: %d", allFaces);
         }
         ImGui::End();
 

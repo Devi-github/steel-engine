@@ -12,8 +12,11 @@ public:
     Mesh(const Mesh&);
     ~Mesh();
 
+    GLuint vbo, vao, ebo;
+
     float* vertexBuffer;
     int vertexCount;
+    int facesCount;
     int vertexSize;
     GLuint* indices;
 };
@@ -34,5 +37,4 @@ public:
     
     Mesh* mesh;
 public: // FIXME: Revert to private after debugging
-    GLuint vbo, vao, ebo;
 };

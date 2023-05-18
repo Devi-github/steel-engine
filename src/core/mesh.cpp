@@ -8,45 +8,71 @@ Mesh::Mesh() {
 }
 Mesh::Mesh(float *buffer, GLuint* indbuff, int vxCount)
 {
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+    glGenVertexArrays(1, &vao);
+
     vertexSize = VERTEX_SIZE;
 
     vertexBuffer = (float*)malloc(vxCount * VERTEX_SIZE * sizeof(float));
     indices = (GLuint*)malloc(vxCount * sizeof(GLuint));
     vertexCount = vxCount;
+    facesCount = vertexCount / 3;
     memcpy(vertexBuffer, buffer, vxCount * VERTEX_SIZE * sizeof(float));
     memcpy(indices, indbuff, vxCount * sizeof(GLuint));
+
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCount * vertexSize, vertexBuffer, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * vertexCount, indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, vertexSize * sizeof(float), (void*)(0)); // vertex position
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, vertexSize * sizeof(float), (void*)(3 * sizeof(float))); // vertex normal
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, false, vertexSize * sizeof(float), (void*)(6 * sizeof(float))); // vertex uv
+    glEnableVertexAttribArray(2);
+
+    glBindVertexArray(0);
 }
 Mesh::Mesh(const Mesh &mesh)
 {
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+    glGenVertexArrays(1, &vao);
+
     vertexSize = VERTEX_SIZE;
 
     vertexBuffer = (float*)malloc(mesh.vertexCount * VERTEX_SIZE * sizeof(float));
     indices = (GLuint*)malloc(mesh.vertexCount * sizeof(GLuint));
     vertexCount = mesh.vertexCount;
+    facesCount = vertexCount / 3;
     memcpy(vertexBuffer, mesh.vertexBuffer, mesh.vertexCount * VERTEX_SIZE * sizeof(float));
     memcpy(indices, mesh.indices, mesh.vertexCount * sizeof(GLuint));
+
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCount * vertexSize, vertexBuffer, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * vertexCount, indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, vertexSize * sizeof(float), (void*)(0)); // vertex position
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, vertexSize * sizeof(float), (void*)(3 * sizeof(float))); // vertex normal
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, false, vertexSize * sizeof(float), (void*)(6 * sizeof(float))); // vertex uv
+    glEnableVertexAttribArray(2);
+
+    glBindVertexArray(0);
 }
 Mesh::~Mesh()
-{
-    free(vertexBuffer);
-    free(indices);
-}
-
-MeshRenderer::MeshRenderer() {
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-    glGenVertexArrays(1, &vao);
-}
-
-MeshRenderer::MeshRenderer(const MeshRenderer &other) : BaseComponent(other)
-{
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-    glGenVertexArrays(1, &vao);
-
-    setMesh(other.mesh);
-}
-MeshRenderer::~MeshRenderer()
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -55,27 +81,27 @@ MeshRenderer::~MeshRenderer()
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
     glDeleteVertexArrays(1, &vao);
+
+    free(vertexBuffer);
+    free(indices);
+}
+
+MeshRenderer::MeshRenderer() {
+    
+}
+
+MeshRenderer::MeshRenderer(const MeshRenderer &other) : BaseComponent(other)
+{
+    setMesh(other.mesh);
+}
+MeshRenderer::~MeshRenderer()
+{
+    
 }
 
 void MeshRenderer::setMesh(Mesh* mesh)
 {
-    this->mesh = new Mesh(mesh->vertexBuffer, mesh->indices, mesh->vertexCount);
-
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * mesh->vertexCount * mesh->vertexSize, mesh->vertexBuffer, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * mesh->vertexCount, mesh->indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, mesh->vertexSize * sizeof(float), (void*)(0)); // vertex position
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, mesh->vertexSize * sizeof(float), (void*)(3 * sizeof(float))); // vertex normal
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, false, mesh->vertexSize * sizeof(float), (void*)(6 * sizeof(float))); // vertex uv
-    glEnableVertexAttribArray(2);
+    this->mesh = mesh;
 }
 
 void MeshRenderer::draw(GLenum type)
@@ -95,8 +121,9 @@ void MeshRenderer::draw(GLenum type)
     sharedMaterial->uniform3("lightColor", Scene::currentScene->light.color);
     sharedMaterial->uniform1("lightIntensity", Scene::currentScene->light.intensity);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+    glBindVertexArray(mesh->vao);
     glDrawElements(type, mesh->vertexCount, GL_UNSIGNED_INT, 0);
 }
 

@@ -28,12 +28,14 @@ SteelObject *SteelObject::duplicate()
     if(strlen(name) < 128 - 8)
         sprintf(obj->name, "%s (Copy)", name);
 
-    auto thsrndrr = getComponent<MeshRenderer>();
-    if(thsrndrr == nullptr) return obj;
+    auto thisRenderer = getComponent<MeshRenderer>();
+    if(thisRenderer == nullptr) return obj;
     
-    auto rndrr = obj->addComponent<MeshRenderer>();
-    rndrr->setMesh(thsrndrr->mesh);
-    rndrr->sharedMaterial = thsrndrr->sharedMaterial;
+    //Mesh *mesh = new Mesh(*thisRenderer->mesh);
+
+    auto newRenderer = obj->addComponent<MeshRenderer>();
+    newRenderer->setMesh(thisRenderer->mesh);
+    newRenderer->sharedMaterial = thisRenderer->sharedMaterial;
     
     return obj;
 }
