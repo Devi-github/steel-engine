@@ -10,9 +10,10 @@ set(SOURCE_FILES main.cpp steel.hpp
     core/scene_manager.cpp core/mesh.cpp
     core/object.cpp core/component.cpp
     core/components/transform.cpp
-    core/material.cpp gameengine/camera.cpp
-    core/shader.cpp
+    core/material.cpp core/shader.cpp
+    
     gameengine/primitives.cpp gameengine/lighting.cpp
+    gameengine/camera.cpp gameengine/arrows.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
