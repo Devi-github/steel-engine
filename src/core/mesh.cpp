@@ -108,6 +108,10 @@ void MeshRenderer::draw(GLenum type)
 {
     if(Scene::currentScene == nullptr || Camera::currentCamera == nullptr || sharedMaterial == nullptr) return;
 
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+    glBindVertexArray(mesh->vao);
+
     sharedMaterial->use();
 
     auto model = steelObject->transform.modelMatrix();
@@ -121,9 +125,6 @@ void MeshRenderer::draw(GLenum type)
     sharedMaterial->uniform3("lightColor", Scene::currentScene->light.color);
     sharedMaterial->uniform1("lightIntensity", Scene::currentScene->light.intensity);
 
-    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-    glBindVertexArray(mesh->vao);
     glDrawElements(type, mesh->vertexCount, GL_UNSIGNED_INT, 0);
 }
 

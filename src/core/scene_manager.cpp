@@ -7,6 +7,13 @@ Scene::Scene()
     Camera::currentCamera = nullptr;
 }
 
+Scene::~Scene()
+{
+    for(auto obj : objects) {
+        delete obj;
+    }
+}
+
 void Scene::tick() {
     for(auto object : objects) {
         object->tick();

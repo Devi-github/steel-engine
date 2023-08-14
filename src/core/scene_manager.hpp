@@ -6,6 +6,7 @@
 class Scene {
 public:
     Scene();
+    ~Scene();
 
     void tick();
     void addObject(SteelObject*);
