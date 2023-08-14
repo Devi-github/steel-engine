@@ -7,6 +7,7 @@
 #include "gameengine/camera.hpp"
 #include "gameengine/primitives.hpp"
 #include "core/shader.hpp"
+#include "gameengine/arrows.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -63,6 +64,8 @@ private:
         Scene::currentScene = &scene;
 
         Camera::currentCamera = &editorCamera;
+
+        setup_arrows();
     }
     void update(double time) override {
         BaseApplication::update(time);
@@ -151,6 +154,19 @@ private:
 
                     chosenGameObject = obj;
                 }
+                if(ImGui::MenuItem("New Sphere")) {
+                    SteelObject* obj = new SteelObject();
+
+                    strcpy(obj->name, "New Sphere");
+
+                    scene.addObject(obj);
+
+                    auto renderer = obj->addComponent<MeshRenderer>();
+                    renderer->setMesh(constructMesh(Primitives::SPHERE));
+                    renderer->sharedMaterial = mainMaterial;
+
+                    chosenGameObject = obj;
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();
@@ -216,6 +232,8 @@ private:
             ImGui::DragFloat3("Position", (float*)&objtrans.position, 0.1f);
             ImGui::DragFloat3("Rotation", (float*)&objtrans.rotation, 0.05f);
             ImGui::DragFloat3("Scale", (float*)&objtrans.scale, 0.1f);
+
+            draw_move_arrows(chosenGameObject->transform.position);
         }
         ImGui::End();
 
