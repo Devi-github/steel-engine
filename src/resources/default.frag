@@ -6,7 +6,7 @@ uniform float lightIntensity;
 uniform vec3 ambient;
 uniform float ambientStrength;
 uniform vec3 objectColor;
-uniform float specularSmoothness = 0.0;
+uniform float specularSmoothness;
 
 in vec3 normal;
 in vec2 texCoords;

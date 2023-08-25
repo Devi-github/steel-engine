@@ -199,7 +199,7 @@ Mesh* constructMesh(Primitives primitive)
         if(sphereMesh != nullptr) return sphereMesh;
         float* vx;
         GLuint* ind;
-        generateSphere(1, 32, 32, &vx, &ind);
+        generateSphere(0.5, 32, 32, &vx, &ind);
         vertexBuffer = vx;
         indicesBuffer = ind;
         resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount);

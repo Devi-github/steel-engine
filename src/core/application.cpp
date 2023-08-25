@@ -13,7 +13,7 @@ BaseApplication::BaseApplication(int w, int h, const char* title) {
 
     glfwWindowHint(GLFW_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_VERSION_MINOR, 3);
-    glfwWindowHint(GL_MULTISAMPLE, 8);
+    //glfwWindowHint(GL_MULTISAMPLE, 8);
 
     window = glfwCreateWindow(w, h, title, nullptr, nullptr);
     if(!window) {

@@ -41,6 +41,7 @@ SteelObject *SteelObject::duplicate()
 
     auto newRenderer = obj->addComponent<MeshRenderer>();
     newRenderer->setMesh(thisRenderer->mesh);
+    newRenderer->material = thisRenderer->material;
     newRenderer->sharedMaterial = thisRenderer->sharedMaterial;
     
     return obj;

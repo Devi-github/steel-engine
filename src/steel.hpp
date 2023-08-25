@@ -362,6 +362,10 @@ private:
     }
     void onMouseCursorCallback(double xpos, double ypos) override {
         BaseApplication::onMouseCursorCallback(xpos, ypos);
+
+        if(MoveArrow::instance != nullptr) {
+            
+        }
     }
     void onMouseWheelCallback(double xoffset, double yoffset) override {
         if(getMouseButton(1)) {
