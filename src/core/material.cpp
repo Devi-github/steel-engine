@@ -54,31 +54,37 @@ void Material::use()
 
 void Material::uniform1(const char *name, float value)
 {
+    use();
     glUniform1f(getLocation(name), value);
 }
 
 void Material::uniform1(const char *name, int value)
 {
+    use();
     glUniform1i(getLocation(name), value);
 }
 
 void Material::uniform1(const char *name, GLuint value)
 {
+    use();
     glUniform1ui(getLocation(name), value);
 }
 
 void Material::uniform1(const char *name, double value)
 {
+    use();
     glUniform1d(getLocation(name), value);
 }
 
 void Material::uniform3(const char *name, glm::vec3 vector)
 {
+    use();
     glUniform3fv(getLocation(name), 1, (float*)&vector);
 }
 
 void Material::uniform4x4(const char *name, glm::mat4 matrix)
 {
+    use();
     glUniformMatrix4fv(getLocation(name), 1, true, (float*)&matrix);
 }
 

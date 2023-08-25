@@ -17,7 +17,8 @@ Mesh::Mesh(float *buffer, GLuint* indbuff, int vxCount)
     vertexBuffer = (float*)malloc(vxCount * VERTEX_SIZE * sizeof(float));
     indices = (GLuint*)malloc(vxCount * sizeof(GLuint));
     vertexCount = vxCount;
-    facesCount = vertexCount / 3;
+    trisCount = vertexCount / 3;
+
     memcpy(vertexBuffer, buffer, vxCount * VERTEX_SIZE * sizeof(float));
     memcpy(indices, indbuff, vxCount * sizeof(GLuint));
 
@@ -50,7 +51,7 @@ Mesh::Mesh(const Mesh &mesh)
     vertexBuffer = (float*)malloc(mesh.vertexCount * VERTEX_SIZE * sizeof(float));
     indices = (GLuint*)malloc(mesh.vertexCount * sizeof(GLuint));
     vertexCount = mesh.vertexCount;
-    facesCount = vertexCount / 3;
+    trisCount = vertexCount / 3;
     memcpy(vertexBuffer, mesh.vertexBuffer, mesh.vertexCount * VERTEX_SIZE * sizeof(float));
     memcpy(indices, mesh.indices, mesh.vertexCount * sizeof(GLuint));
 
@@ -96,7 +97,7 @@ MeshRenderer::MeshRenderer(const MeshRenderer &other) : BaseComponent(other)
 }
 MeshRenderer::~MeshRenderer()
 {
-    
+    delete mesh;
 }
 
 void MeshRenderer::setMesh(Mesh* mesh)
@@ -106,24 +107,43 @@ void MeshRenderer::setMesh(Mesh* mesh)
 
 void MeshRenderer::draw(GLenum type)
 {
-    if(Scene::currentScene == nullptr || Camera::currentCamera == nullptr || sharedMaterial == nullptr) return;
+    if(Scene::currentScene == nullptr || Camera::currentCamera == nullptr) return;
+
+    if(sharedMaterial != nullptr)
+        sharedMaterial->use();
+    else if(material != nullptr)
+        material->use();
+    else
+        return;
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
     glBindVertexArray(mesh->vao);
 
-    sharedMaterial->use();
-
     auto model = steelObject->transform.modelMatrix();
     auto normMat = steelObject->transform.normalMatrix();
 
-    sharedMaterial->uniform4x4("model", model);
-    sharedMaterial->uniform4x4("normalMatrix", normMat);
-    sharedMaterial->uniform4x4("view", Camera::currentCamera->viewMatrix());
-    sharedMaterial->uniform4x4("projection", Camera::currentCamera->projectionMatrix());
-    sharedMaterial->uniform3("lightDirection", Scene::currentScene->light.direction);
-    sharedMaterial->uniform3("lightColor", Scene::currentScene->light.color);
-    sharedMaterial->uniform1("lightIntensity", Scene::currentScene->light.intensity);
+    if(sharedMaterial != nullptr) {
+        sharedMaterial->uniform4x4("model", model);
+        sharedMaterial->uniform4x4("normalMatrix", normMat);
+        sharedMaterial->uniform4x4("view", Camera::currentCamera->viewMatrix());
+        sharedMaterial->uniform4x4("projection", Camera::currentCamera->projectionMatrix());
+        sharedMaterial->uniform3("lightDirection", Scene::currentScene->light.direction);
+        sharedMaterial->uniform3("lightColor", Scene::currentScene->light.color);
+        sharedMaterial->uniform1("lightIntensity", Scene::currentScene->light.intensity);
+        sharedMaterial->uniform3("ambient", Scene::currentScene->backgroundColor);
+        sharedMaterial->uniform1("ambientStrength", 0.1);
+    } else {
+        material->uniform4x4("model", model);
+        material->uniform4x4("normalMatrix", normMat);
+        material->uniform4x4("view", Camera::currentCamera->viewMatrix());
+        material->uniform4x4("projection", Camera::currentCamera->projectionMatrix());
+        material->uniform3("lightDirection", Scene::currentScene->light.direction);
+        material->uniform3("lightColor", Scene::currentScene->light.color);
+        material->uniform1("lightIntensity", Scene::currentScene->light.intensity);
+        material->uniform3("ambient", Scene::currentScene->backgroundColor);
+        material->uniform1("ambientStrength", 1);
+    }
 
     glDrawElements(type, mesh->vertexCount, GL_UNSIGNED_INT, 0);
 }

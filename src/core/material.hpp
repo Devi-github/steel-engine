@@ -12,7 +12,7 @@ struct MaterialProperty {
     GLuint location;
 };
 
-class Material { // TODO: Create a different class for storing shaders in because Material shoudl be only for instances or shared (we'll see)
+class Material {
 public:
     Material();
     Material(const Material& other) = delete;

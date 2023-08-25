@@ -17,5 +17,7 @@ public:
 public:
     DirectionalLight light;
 
+    glm::vec3 backgroundColor;
+
     std::vector<SteelObject*> objects;
 };

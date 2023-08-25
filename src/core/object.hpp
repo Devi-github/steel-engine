@@ -2,17 +2,21 @@
 #include <vector>
 #include <map>
 #include <typeindex>
+#include <string>
+#include <iostream>
 
 #include "components/transform.hpp"
+#include "component_container.hpp"
 
 class BaseComponent;
 
 class SteelObject final {
 public:
     SteelObject();
+    SteelObject(std::string name);
+    ~SteelObject();
 
-    // Max name size: 128 characters
-    char name[128];
+    std::string name;
 
     Transform transform;
 
@@ -23,10 +27,12 @@ public:
     template <class T>
     T* addComponent() {
         static_assert(std::is_base_of<BaseComponent, T>::value, "Type must inherit base component class");
-        auto newComponent = (BaseComponent*)new T();
-        newComponent->steelObject = this;
-        components.insert({typeid(T), newComponent});
-        return (T*)newComponent;
+        std::cout << sizeof(T) << '\n';
+        std::cout << sizeof(BaseComponent) << '\n';
+        T* newComponent = new T();
+        ((BaseComponent*)newComponent)->steelObject = this;
+        components.insert({typeid(T), (BaseComponent*)newComponent});
+        return newComponent;
     }
 
     template <class T>

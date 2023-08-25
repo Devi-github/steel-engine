@@ -16,7 +16,7 @@ public:
 
     float* vertexBuffer;
     int vertexCount;
-    int facesCount;
+    int trisCount;
     int vertexSize;
     GLuint* indices;
 };
@@ -31,10 +31,12 @@ public:
     void onUpdate() override;
     void draw(GLenum primitiveType);
     
+    Material* material = nullptr;
     Material* sharedMaterial = nullptr;
 
     int drawType = GL_TRIANGLES;
+    bool drawOutline = false;
     
     Mesh* mesh;
-public: // FIXME: Revert to private after debugging
+private:
 };

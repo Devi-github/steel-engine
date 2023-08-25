@@ -15,6 +15,7 @@
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 class SteelMain final : public BaseApplication {
 public:
@@ -43,8 +44,16 @@ private:
 
 private:
     void check_wireframe() {
-        if(wireframeMode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if(wireframeMode) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDisable(GL_CULL_FACE);
+            glDisable(GL_DEPTH_TEST);
+        }
+        else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+        }
     }
     void init() override {
         BaseApplication::init();
@@ -52,13 +61,14 @@ private:
         editorCamera.transform.position = glm::vec3(0, 1, 4);
         editorCamera.transform.rotation = glm::vec3(0, glm::pi<float>(), 0);
 
-        glClearColor(0.3, 0.7, 1, 1);
+        scene.backgroundColor = glm::vec3(0.3, 0.7, 1);
+
+        glClearColor(scene.backgroundColor.x, scene.backgroundColor.y, scene.backgroundColor.z, 1);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
 
         mainMaterial = Material::Default();
-        mainMaterial->use();
         mainMaterial->uniform3("objectColor", glm::vec3(1, 0.2, 0.2));
 
         Scene::currentScene = &scene;
@@ -66,6 +76,7 @@ private:
         Camera::currentCamera = &editorCamera;
 
         setup_arrows();
+        setVsync(1); // set vsync to 1
     }
     void update(double time) override {
         BaseApplication::update(time);
@@ -77,7 +88,7 @@ private:
             auto renderer = object->getComponent<MeshRenderer>();
             if(renderer != nullptr) {
                 allVertices += renderer->mesh->vertexCount;
-                allFaces += renderer->mesh->facesCount;
+                allFaces += renderer->mesh->trisCount;
             }
         }
 
@@ -125,45 +136,78 @@ private:
             }
             ImGui::EndMenu();
         }
-// FIXME: I don't know why, but creating new objects usually overwrites a previously created object's mesh
+// FIXME: I don't know why, but creating new objects overwrites a previously created object's mesh
         if(ImGui::BeginMenu("SteelObject")) {
             if(ImGui::BeginMenu("Create Object")) {
                 if(ImGui::MenuItem("New Cube")) {
                     SteelObject* obj = new SteelObject();
                     
-                    strcpy(obj->name, "New Cube");
+                    obj->name = "New Cube";
 
                     scene.addObject(obj);
 
                     auto renderer = obj->addComponent<MeshRenderer>();
                     renderer->setMesh(constructMesh(Primitives::CUBE));
-                    renderer->sharedMaterial = mainMaterial;
+
+                    renderer->material = Material::Default();
+
+                    float rnd = rand() / (float)RAND_MAX;
+
+                    renderer->material->uniform3("objectColor", 
+                        glm::vec3(
+                            rand() / (float)RAND_MAX, 
+                            rand() / (float)RAND_MAX, 
+                            rand() / (float)RAND_MAX
+                        )
+                    );
 
                     chosenGameObject = obj;
                 }
                 if(ImGui::MenuItem("New Plane")) {
                     SteelObject* obj = new SteelObject();
                     
-                    strcpy(obj->name, "New Plane");
+                    obj->name = "New Plane";
 
                     scene.addObject(obj);
 
                     auto renderer = obj->addComponent<MeshRenderer>();
                     renderer->setMesh(constructMesh(Primitives::PLANE));
-                    renderer->sharedMaterial = mainMaterial;
+
+                    renderer->material = Material::Default();
+
+                    float rnd = rand() / (float)RAND_MAX;
+
+                    renderer->material->uniform3("objectColor", 
+                        glm::vec3(
+                            rand() / (float)RAND_MAX, 
+                            rand() / (float)RAND_MAX, 
+                            rand() / (float)RAND_MAX
+                        )
+                    );
 
                     chosenGameObject = obj;
                 }
                 if(ImGui::MenuItem("New Sphere")) {
                     SteelObject* obj = new SteelObject();
 
-                    strcpy(obj->name, "New Sphere");
+                    obj->name = "New Sphere";
 
                     scene.addObject(obj);
 
                     auto renderer = obj->addComponent<MeshRenderer>();
                     renderer->setMesh(constructMesh(Primitives::SPHERE));
-                    renderer->sharedMaterial = mainMaterial;
+
+                    renderer->material = Material::Default();
+
+                    float rnd = rand() / (float)RAND_MAX;
+
+                    renderer->material->uniform3("objectColor", 
+                        glm::vec3(
+                            rand() / (float)RAND_MAX, 
+                            rand() / (float)RAND_MAX, 
+                            rand() / (float)RAND_MAX
+                        )
+                    );
 
                     chosenGameObject = obj;
                 }
@@ -196,10 +240,10 @@ private:
             ImGui::BeginListBox("##");
 
             for(auto object : scene.objects) {
-                char label[150];
-                sprintf(label, "%s (0x%lx)", object->name, (unsigned long)object);
-                std::string _label = label;
-                if(ImGui::Selectable(_label.c_str(), false)) {
+                std::stringstream label;
+                label << object->name << " (0x" << (unsigned long)object << ")";
+                std::string _label = label.str();
+                if(ImGui::Selectable(_label.c_str(), chosenGameObject == object)) {
                     chosenGameObject = object;
                 }
             }
@@ -216,7 +260,7 @@ private:
 
         render_object_list();
 
-        Transform& objtrans = chosenGameObject->transform;
+        Transform* objtrans = &chosenGameObject->transform;
         
         ImGui::Begin("Statistics");
     
@@ -227,13 +271,13 @@ private:
 
         ImGui::Begin("Object information");
         if(chosenGameObject != nullptr) {
-            ImGui::InputText("Name", chosenGameObject->name, 128);
+            ImGui::InputText("Name", chosenGameObject->name.data(), 128); // FIXME: Create custom method for this, because SIGSEGV
 
-            ImGui::DragFloat3("Position", (float*)&objtrans.position, 0.1f);
-            ImGui::DragFloat3("Rotation", (float*)&objtrans.rotation, 0.05f);
-            ImGui::DragFloat3("Scale", (float*)&objtrans.scale, 0.1f);
+            ImGui::DragFloat3("Position", (float*)&objtrans->position, 0.1f);
+            ImGui::DragFloat3("Rotation", (float*)&objtrans->rotation, 0.05f);
+            ImGui::DragFloat3("Scale", (float*)&objtrans->scale, 0.1f);
 
-            draw_move_arrows(chosenGameObject->transform.position);
+            draw_move_arrows(objtrans->position);
         }
         ImGui::End();
 
@@ -247,6 +291,7 @@ private:
                 ImGui::Text("Mesh vertex buffer is at: %p", mr->mesh->vertexBuffer);
                 ImGui::Text("Mesh element buffer is at: %p", mr->mesh->indices);
                 ImGui::Text("Vertices: %d", mr->mesh->vertexCount);
+                ImGui::Text("Material is at: %p", mr->material);
                 ImGui::Text("Shared material is at: %p", mr->sharedMaterial);
             } else {
                 ImGui::Text("No mesh renderer component found!");
@@ -320,8 +365,8 @@ private:
     }
     void onMouseWheelCallback(double xoffset, double yoffset) override {
         if(getMouseButton(1)) {
-            cameraSpeed += yoffset * 0.1f;
-            cameraSpeed = cameraSpeed < 0.02f ? 0.02 : cameraSpeed;
+            cameraSpeed += yoffset * 0.1;
+            cameraSpeed = cameraSpeed < 0.01f ? 0.01 : (cameraSpeed > 100 ? 100 : cameraSpeed);
         }
         BaseApplication::onMouseWheelCallback(xoffset, yoffset);
     }

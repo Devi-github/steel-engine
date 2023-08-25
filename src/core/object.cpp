@@ -1,15 +1,22 @@
 #include "object.hpp"
 #include "component.hpp"
 #include "mesh.hpp"
+
 #include <cstring>
 #include <iostream>
+#include <fmt/core.h>
 
-SteelObject::SteelObject()
+SteelObject::SteelObject() : name("SteelGameObject")
 {
-    strcpy(name, "SteelGameObject");
-    
     components.insert({typeid(Transform), (BaseComponent*)(&transform)});
-    transform.steelObject = this;
+}
+
+SteelObject::SteelObject(std::string name) : name(name)
+{
+}
+
+SteelObject::~SteelObject() {
+
 }
 
 void SteelObject::tick() {
@@ -25,8 +32,7 @@ SteelObject *SteelObject::duplicate()
 
     obj->transform.copyTransform(transform);
 
-    if(strlen(name) < 128 - 8)
-        sprintf(obj->name, "%s (Copy)", name);
+    name += " (Copy)";
 
     auto thisRenderer = getComponent<MeshRenderer>();
     if(thisRenderer == nullptr) return obj;

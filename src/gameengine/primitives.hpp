@@ -7,4 +7,5 @@ enum Primitives {
     PLANE
 };
 
+void generateSphere(float radius, int sector_count, int stack_count, float** outVertices, GLuint** outIndices);
 Mesh* constructMesh(Primitives primitive);

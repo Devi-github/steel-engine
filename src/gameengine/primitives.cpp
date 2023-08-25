@@ -77,10 +77,14 @@ const GLuint planeIndices[6] = {
     0, 3, 2
 };
 
+static Mesh* boxMesh = nullptr;
+static Mesh* sphereMesh = nullptr;
+static Mesh* planeMesh = nullptr;
 
 /*
  * Credit goes to http://www.songho.ca/opengl/gl_sphere.html
-*/
+ * // FIXME: A lot of triangles generated on the inside. May impact performance
+ */
 void generateSphere(float radius, int sector_count, int stack_count, float** outVertices, GLuint** outIndices) {
     std::vector<float> vertexData;
 
@@ -178,31 +182,45 @@ Mesh* constructMesh(Primitives primitive)
     GLuint* indicesBuffer;
     int vertexCount;
 
+    Mesh* resultMesh;
+
     switch(primitive) {
         case Primitives::CUBE:
+        if(boxMesh != nullptr) return boxMesh;
         vertexBuffer = (float*)malloc(sizeof(cubeVertices));
         indicesBuffer = (GLuint*)malloc(sizeof(cubeIndices));
         memcpy(vertexBuffer, cubeVertices, sizeof(cubeVertices));
         memcpy(indicesBuffer, cubeIndices, sizeof(cubeIndices));
         vertexCount = sizeof(cubeIndices) / sizeof(GLuint);
+        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount);
+        boxMesh = resultMesh;
         break;
         case Primitives::SPHERE:
+        if(sphereMesh != nullptr) return sphereMesh;
         float* vx;
         GLuint* ind;
         generateSphere(1, 32, 32, &vx, &ind);
         vertexBuffer = vx;
         indicesBuffer = ind;
+        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount);
+        sphereMesh = resultMesh;
         break;
         case Primitives::PLANE:
+        if(planeMesh != nullptr) return planeMesh;
         vertexBuffer = (float*)malloc(sizeof(planeVertices));
         indicesBuffer = (GLuint*)malloc(sizeof(planeIndices));
         memcpy(vertexBuffer, planeVertices, sizeof(planeVertices));
         memcpy(indicesBuffer, planeIndices, sizeof(planeIndices));
         vertexCount = sizeof(planeIndices) / sizeof(GLuint);
+        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount);
+        planeMesh = resultMesh;
         break;
         default:
         return nullptr;
     }
 
-    return new Mesh(vertexBuffer, indicesBuffer, vertexCount);
+    free(vertexBuffer);
+    free(indicesBuffer);
+
+    return resultMesh;
 }

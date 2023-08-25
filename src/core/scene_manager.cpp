@@ -26,4 +26,5 @@ void Scene::addObject(SteelObject* object) {
 
 void Scene::removeObject(SteelObject* object) {
     objects.erase(std::remove(objects.begin(), objects.end(), object), objects.end());
+    delete object;
 }
