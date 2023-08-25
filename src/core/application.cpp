@@ -56,6 +56,8 @@ BaseApplication::BaseApplication(int w, int h, const char* title) {
     };
     glfwSetScrollCallback(window, mouseWheelCall);
 
+    glfwSwapInterval(0);
+
     initialize_imgui(window);
 }
 double BaseApplication::getTime() {
@@ -147,6 +149,10 @@ void BaseApplication::updateTitle()
 
     glfwSetWindowTitle(window, title);
     currentDelay = setTitleDelay;
+}
+
+void BaseApplication::setVsync(int interval) {
+    glfwSwapInterval(interval);
 }
 
 void BaseApplication::stop(int exitCode) {

@@ -47,6 +47,8 @@ protected:
     bool getMouseButton(int key);
 
     void updateTitle();
+
+    void setVsync(int);
     
     bool wireframeMode = false;
 
