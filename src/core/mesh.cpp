@@ -116,9 +116,9 @@ void MeshRenderer::draw(GLenum type)
     else
         return;
 
+    glBindVertexArray(mesh->vao);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
-    glBindVertexArray(mesh->vao);
 
     auto model = steelObject->transform.modelMatrix();
     auto normMat = steelObject->transform.normalMatrix();
