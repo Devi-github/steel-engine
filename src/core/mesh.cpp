@@ -6,7 +6,7 @@
 Mesh::Mesh() {
 
 }
-Mesh::Mesh(float *buffer, GLuint* indbuff, int vxCount)
+Mesh::Mesh(float *buffer, GLuint* indbuff, int vxCount, int idCount)
 {
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
@@ -15,19 +15,19 @@ Mesh::Mesh(float *buffer, GLuint* indbuff, int vxCount)
     vertexSize = VERTEX_SIZE;
 
     vertexBuffer = (float*)malloc(vxCount * VERTEX_SIZE * sizeof(float));
-    indices = (GLuint*)malloc(vxCount * sizeof(GLuint));
+    indices = (GLuint*)malloc(idCount * sizeof(GLuint));
     vertexCount = vxCount;
-    trisCount = vertexCount / 3;
+    indicesCount = idCount;
 
     memcpy(vertexBuffer, buffer, vxCount * VERTEX_SIZE * sizeof(float));
-    memcpy(indices, indbuff, vxCount * sizeof(GLuint));
+    memcpy(indices, indbuff, idCount * sizeof(GLuint));
 
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCount * vertexSize, vertexBuffer, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * vertexCount, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * idCount, indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, false, vertexSize * sizeof(float), (void*)(0)); // vertex position
     glEnableVertexAttribArray(0);
@@ -49,18 +49,18 @@ Mesh::Mesh(const Mesh &mesh)
     vertexSize = VERTEX_SIZE;
 
     vertexBuffer = (float*)malloc(mesh.vertexCount * VERTEX_SIZE * sizeof(float));
-    indices = (GLuint*)malloc(mesh.vertexCount * sizeof(GLuint));
+    indices = (GLuint*)malloc(mesh.indicesCount * sizeof(GLuint));
     vertexCount = mesh.vertexCount;
-    trisCount = vertexCount / 3;
+    indicesCount = mesh.indicesCount;
     memcpy(vertexBuffer, mesh.vertexBuffer, mesh.vertexCount * VERTEX_SIZE * sizeof(float));
-    memcpy(indices, mesh.indices, mesh.vertexCount * sizeof(GLuint));
+    memcpy(indices, mesh.indices, mesh.indicesCount * sizeof(GLuint));
 
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexCount * vertexSize, vertexBuffer, GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * vertexCount, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indicesCount, indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, false, vertexSize * sizeof(float), (void*)(0)); // vertex position
     glEnableVertexAttribArray(0);
@@ -87,6 +87,72 @@ Mesh::~Mesh()
     free(indices);
 }
 
+glm::vec3 Mesh::findMaxBound()
+{
+    glm::vec3 minBound = glm::vec3(INFINITY);
+    for(int i = 0; i < vertexCount * vertexSize; i += vertexSize) {
+        float x = vertexBuffer[i + 0];
+        float y = vertexBuffer[i + 1];
+        float z = vertexBuffer[i + 2];
+
+        if(x < minBound.x) minBound.x = x;
+        if(y < minBound.y) minBound.y = y;
+        if(z < minBound.z) minBound.z = z;
+    }
+    return minBound;
+}
+
+glm::vec3 Mesh::findMinBound()
+{
+    glm::vec3 maxBound = glm::vec3(-INFINITY);
+    for(int i = 0; i < vertexCount * vertexSize; i += vertexSize) {
+        float x = vertexBuffer[i + 0];
+        float y = vertexBuffer[i + 1];
+        float z = vertexBuffer[i + 2];
+
+        if(x > maxBound.x) maxBound.x = x;
+        if(y > maxBound.y) maxBound.y = y;
+        if(z > maxBound.z) maxBound.z = z;
+    }
+    return maxBound;
+}
+
+glm::vec3 Mesh::findMinBoundWithModel(glm::mat4 model)
+{
+    glm::vec3 minBound = glm::vec3(INFINITY);
+    for(int i = 0; i < vertexCount * vertexSize; i += vertexSize) {
+        float x = vertexBuffer[i + 0];
+        float y = vertexBuffer[i + 1];
+        float z = vertexBuffer[i + 2];
+
+        glm::vec4 tmp(x, y, z, 1);
+        tmp = tmp * model;
+
+        if(tmp.x < minBound.x) minBound.x = tmp.x;
+        if(tmp.y < minBound.y) minBound.y = tmp.y;
+        if(tmp.z < minBound.z) minBound.z = tmp.z;
+    }
+    return minBound;
+}
+
+glm::vec3 Mesh::findMaxBoundWithModel(glm::mat4 model)
+{
+    glm::vec3 maxBound = glm::vec3(-INFINITY);
+    for(int i = 0; i < vertexCount * vertexSize; i += vertexSize) {
+        float x = vertexBuffer[i + 0];
+        float y = vertexBuffer[i + 1];
+        float z = vertexBuffer[i + 2];
+
+        glm::vec4 tmp(x, y, z, 1);
+        tmp = tmp * model;
+
+        if(tmp.x > maxBound.x) maxBound.x = tmp.x;
+        if(tmp.y > maxBound.y) maxBound.y = tmp.y;
+        if(tmp.z > maxBound.z) maxBound.z = tmp.z;
+    }
+    return maxBound;
+}
+
 MeshRenderer::MeshRenderer() {
     
 }
@@ -97,7 +163,6 @@ MeshRenderer::MeshRenderer(const MeshRenderer &other) : BaseComponent(other)
 }
 MeshRenderer::~MeshRenderer()
 {
-    delete mesh;
 }
 
 void MeshRenderer::setMesh(Mesh* mesh)
@@ -145,7 +210,7 @@ void MeshRenderer::draw(GLenum type)
         material->uniform1("ambientStrength", 1);
     }
 
-    glDrawElements(type, mesh->vertexCount, GL_UNSIGNED_INT, 0);
+    glDrawElements(type, mesh->indicesCount, GL_UNSIGNED_INT, 0);
 }
 
 void MeshRenderer::onUpdate() {

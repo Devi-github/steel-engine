@@ -8,15 +8,20 @@
 struct Mesh {
 public:
     Mesh();
-    Mesh(float* buffer, GLuint* indbuff, int vxCount);
+    Mesh(float* buffer, GLuint* indbuff, int vxCount, int idCount);
     Mesh(const Mesh&);
     ~Mesh();
+
+    glm::vec3 findMinBound();
+    glm::vec3 findMaxBound();
+    glm::vec3 findMinBoundWithModel(glm::mat4 model);
+    glm::vec3 findMaxBoundWithModel(glm::mat4 model);
 
     GLuint vbo, vao, ebo;
 
     float* vertexBuffer;
     int vertexCount;
-    int trisCount;
+    int indicesCount;
     int vertexSize;
     GLuint* indices;
 };

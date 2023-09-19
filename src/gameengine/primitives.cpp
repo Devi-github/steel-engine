@@ -85,7 +85,11 @@ static Mesh* planeMesh = nullptr;
  * Credit goes to http://www.songho.ca/opengl/gl_sphere.html
  * // FIXME: A lot of triangles generated on the inside. May impact performance
  */
-void generateSphere(float radius, int sector_count, int stack_count, float** outVertices, GLuint** outIndices) {
+void generateSphere(
+    float radius, int sector_count, int stack_count, 
+    float** outVertices, GLuint** outIndices,
+    int* vertexCount, int* indicesCount
+    ) {
     std::vector<float> vertexData;
 
     float x, y, z, xy;                              // vertex position
@@ -174,6 +178,9 @@ void generateSphere(float radius, int sector_count, int stack_count, float** out
 
     memcpy(*outVertices, vertexData.data(), vertexData.size() * sizeof(float));
     memcpy(*outIndices, indices.data(), indices.size() * sizeof(GLuint));
+
+    *vertexCount = vertexData.size();
+    *indicesCount = indices.size();
 }
 
 Mesh* constructMesh(Primitives primitive)
@@ -181,6 +188,7 @@ Mesh* constructMesh(Primitives primitive)
     float* vertexBuffer;
     GLuint* indicesBuffer;
     int vertexCount;
+    int idsCount;
 
     Mesh* resultMesh;
 
@@ -191,18 +199,18 @@ Mesh* constructMesh(Primitives primitive)
         indicesBuffer = (GLuint*)malloc(sizeof(cubeIndices));
         memcpy(vertexBuffer, cubeVertices, sizeof(cubeVertices));
         memcpy(indicesBuffer, cubeIndices, sizeof(cubeIndices));
-        vertexCount = sizeof(cubeIndices) / sizeof(GLuint);
-        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount);
+        vertexCount = sizeof(cubeVertices) / (sizeof(float) * VERTEX_SIZE);
+        idsCount = sizeof(cubeIndices) / sizeof(GLuint);
+        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount, idsCount);
         boxMesh = resultMesh;
         break;
         case Primitives::SPHERE:
         if(sphereMesh != nullptr) return sphereMesh;
         float* vx;
         GLuint* ind;
-        generateSphere(0.5, 32, 32, &vx, &ind);
-        vertexBuffer = vx;
-        indicesBuffer = ind;
-        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount);
+        generateSphere(0.5, 32, 32, 
+            &vertexBuffer, &indicesBuffer, &vertexCount, &idsCount);
+        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount, idsCount);
         sphereMesh = resultMesh;
         break;
         case Primitives::PLANE:
@@ -211,8 +219,9 @@ Mesh* constructMesh(Primitives primitive)
         indicesBuffer = (GLuint*)malloc(sizeof(planeIndices));
         memcpy(vertexBuffer, planeVertices, sizeof(planeVertices));
         memcpy(indicesBuffer, planeIndices, sizeof(planeIndices));
-        vertexCount = sizeof(planeIndices) / sizeof(GLuint);
-        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount);
+        vertexCount = sizeof(planeVertices) / (sizeof(float) * VERTEX_SIZE);
+        idsCount = sizeof(planeIndices) / sizeof(GLuint);
+        resultMesh = new Mesh(vertexBuffer, indicesBuffer, vertexCount, idsCount);
         planeMesh = resultMesh;
         break;
         default:
