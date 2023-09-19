@@ -11,6 +11,5 @@ int main() {
     srand(time(NULL));
     SteelMain steel(1920, 1080);
 
-    steel.run();
-    return 0;
+    return steel.run();
 }
