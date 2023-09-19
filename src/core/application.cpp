@@ -1,5 +1,7 @@
 #include "application.hpp"
 #include "steel_imgui.hpp"
+#include "screen.hpp"
+
 #include <GL/glew.h>
 #include <iostream>
 
@@ -15,6 +17,10 @@ BaseApplication::BaseApplication(int w, int h, const char* title) {
     glfwWindowHint(GLFW_VERSION_MINOR, 3);
     //glfwWindowHint(GL_MULTISAMPLE, 8);
 
+    Screen::instance = new Screen();
+    Screen::instance->width = w;
+    Screen::instance->height = h;
+
     window = glfwCreateWindow(w, h, title, nullptr, nullptr);
     if(!window) {
         std::cerr << "Failed to create a window!" << std::endl;
@@ -29,6 +35,8 @@ BaseApplication::BaseApplication(int w, int h, const char* title) {
 
     Width = w;
     Height = h;
+
+    totalTimeElapsed = 0.0;
 
     glfwSetWindowUserPointer(window, this);
     auto resize = [](GLFWwindow* w, int wid, int hei) {
@@ -55,8 +63,6 @@ BaseApplication::BaseApplication(int w, int h, const char* title) {
         static_cast<BaseApplication*>(glfwGetWindowUserPointer(w))->onMouseWheelCallback(xoff, yoff);
     };
     glfwSetScrollCallback(window, mouseWheelCall);
-
-    glfwSwapInterval(0);
 
     initialize_imgui(window);
 }
@@ -99,15 +105,15 @@ int BaseApplication::run()
     init();
     glfwSetTime(0);
     double time = 0;
-    double renderDelta = 0.01; // Small amount, so that divide by zero won't happen
-    double updateDelta = 0.01; // Small amount, so that divide by zero won't happen
+    double delta = 0; // Small amount, so that divide by zero won't happen
+
     while(!glfwWindowShouldClose(window)) {
-        render(renderDelta);
-        renderDelta = glfwGetTime() - time;
+        render(delta);
         time = glfwGetTime();
-        update(updateDelta);
-        updateDelta = glfwGetTime() - time;
+        update(delta);
+        delta = glfwGetTime() - time;
         time = glfwGetTime();
+        totalTimeElapsed = time;
     }
     onEnd();
     return exitCode;

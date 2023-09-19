@@ -23,6 +23,8 @@ public:
 public:
     int Width, Height;
 
+    double totalTimeElapsed;
+
 protected:
     virtual void update(double time);
 
