@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../core/components/transform.hpp"
+#include "../core/ray.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -14,6 +15,8 @@ public:
 
     glm::mat4 viewMatrix();
     glm::mat4 projectionMatrix();
+    glm::vec2 worldToScreenSpace(glm::vec3 world);
+    Ray rayFromCameraScreenSpace(glm::vec2 point);
 
     Transform transform;
 
