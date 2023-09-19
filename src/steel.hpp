@@ -8,6 +8,8 @@
 #include "gameengine/primitives.hpp"
 #include "core/shader.hpp"
 #include "gameengine/arrows.hpp"
+#include "core/screen.hpp"
+#include "gameengine/debug.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -75,6 +77,8 @@ private:
 
         Camera::currentCamera = &editorCamera;
 
+        setup_debug();
+        set_debug_color(glm::vec3(1));
         setup_arrows();
         setVsync(1); // set vsync to 1
     }
@@ -88,7 +92,7 @@ private:
             auto renderer = object->getComponent<MeshRenderer>();
             if(renderer != nullptr) {
                 allVertices += renderer->mesh->vertexCount;
-                allFaces += renderer->mesh->trisCount;
+                allFaces += renderer->mesh->indicesCount / 3; // Assuming triangles
             }
         }
 
@@ -103,16 +107,16 @@ private:
         editorCamera.transform.rotate(glm::vec3(-glm::radians(deltaMouseY) * 0.1, glm::radians(deltaMouseX) * 0.1, 0));
 
         if(getKey(GLFW_KEY_W)) {
-            editorCamera.transform.position += editorCamera.transform.forward() * cameraSpeed;
+            editorCamera.transform.position += editorCamera.transform.forward() * cameraSpeed * 100.0f * (float)time;
         }
         if(getKey(GLFW_KEY_S)) {
-            editorCamera.transform.position -= editorCamera.transform.forward() * cameraSpeed;
+            editorCamera.transform.position -= editorCamera.transform.forward() * cameraSpeed * 100.0f * (float)time;
         }
         if(getKey(GLFW_KEY_A)) {
-            editorCamera.transform.position -= editorCamera.transform.right() * cameraSpeed;
+            editorCamera.transform.position -= editorCamera.transform.right() * cameraSpeed * 100.0f * (float)time;
         }
         if(getKey(GLFW_KEY_D)) {
-            editorCamera.transform.position += editorCamera.transform.right() * cameraSpeed;
+            editorCamera.transform.position += editorCamera.transform.right() * cameraSpeed * 100.0f * (float)time;
         }
     }
     void render_main_bar() {
@@ -331,6 +335,24 @@ private:
 
         render_ui(time);
 
+        set_debug_color(glm::vec3(1));
+
+        if(chosenGameObject != nullptr) {
+            auto mr = chosenGameObject->getComponent<MeshRenderer>();
+            glm::vec3 minBound = mr->mesh->findMinBoundWithModel(chosenGameObject->transform.modelMatrix());
+            glm::vec3 maxBound = mr->mesh->findMaxBoundWithModel(chosenGameObject->transform.modelMatrix());
+
+            draw_line(minBound, maxBound);
+
+            glm::vec3 center = (minBound + maxBound) / 2.0f;
+
+            float x_sc = maxBound.x - minBound.x;
+            float y_sc = maxBound.y - minBound.y;
+            float z_sc = maxBound.z - minBound.z;
+
+            draw_wire_cube(center, glm::vec3(x_sc, y_sc, z_sc));
+        }
+
         check_wireframe();
         swapBuffers();
         BaseApplication::render(time);
@@ -363,8 +385,17 @@ private:
     void onMouseCursorCallback(double xpos, double ypos) override {
         BaseApplication::onMouseCursorCallback(xpos, ypos);
 
-        if(MoveArrow::instance != nullptr) {
-            
+        if(MoveArrow::instance != nullptr && chosenGameObject != nullptr) {
+            Ray ray = editorCamera.rayFromCameraScreenSpace(glm::vec2(xpos, ypos));
+
+            set_debug_color(glm::vec3(1, 0, 0));
+            draw_line(ray.origin, ray.direction);
+
+            MoveArrow::instance->x_highlight = 
+                MoveArrow::instance->XBB(
+                    chosenGameObject->transform.position, 
+                    ray.origin, ray.direction
+                );
         }
     }
     void onMouseWheelCallback(double xoffset, double yoffset) override {

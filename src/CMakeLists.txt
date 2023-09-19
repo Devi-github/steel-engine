@@ -11,9 +11,11 @@ set(SOURCE_FILES main.cpp steel.hpp
     core/object.cpp core/component.cpp
     core/components/transform.cpp
     core/material.cpp core/shader.cpp
+    core/screen.cpp
     
     gameengine/primitives.cpp gameengine/lighting.cpp
     gameengine/camera.cpp gameengine/arrows.cpp
+    gameengine/debug.cpp
 )
 
 set(GLSL_VALIDATOR /usr/bin/glslangValidator)
