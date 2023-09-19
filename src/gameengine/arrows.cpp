@@ -184,10 +184,10 @@ bool testBB(glm::vec3 pos, glm::vec3 dir, glm::vec3 aabb_min, glm::vec3 aabb_max
 
 bool MoveArrow::XBB(glm::vec3 origin, glm::vec3 position, glm::vec3 direction)
 {
-    auto min = glm::vec3(-1) - origin;
-    auto max = glm::vec3(1) - origin;
+    auto min = glm::vec3(-1);
+    auto max = glm::vec3(1);
     
-    return testBB(position, direction, min, max);
+    return testBB(position + origin, direction, min, max);
 }
 
 bool MoveArrow::YBB(glm::vec3 origin, glm::vec3 position, glm::vec3 direction)
