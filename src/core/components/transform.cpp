@@ -23,7 +23,8 @@ glm::mat4 Transform::modelMatrix()
 {
     return glm::translate(position) * glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z) * glm::scale(scale);
 }
-glm::mat4 Transform::normalMatrix() {
+
+glm::mat4 Transform::uniformModelMatrix() {
     return glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
 }
 

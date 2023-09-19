@@ -10,7 +10,7 @@ public:
     void copyTransform(Transform& other);
 
     glm::mat4 modelMatrix();
-    glm::mat4 normalMatrix();
+    glm::mat4 uniformModelMatrix();
 
     void rotate(glm::vec3 euler);
     glm::vec3 forward();

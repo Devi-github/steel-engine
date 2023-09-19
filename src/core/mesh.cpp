@@ -186,7 +186,7 @@ void MeshRenderer::draw(GLenum type)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
 
     auto model = steelObject->transform.modelMatrix();
-    auto normMat = steelObject->transform.normalMatrix();
+    auto normMat = steelObject->transform.uniformModelMatrix();
 
     if(sharedMaterial != nullptr) {
         sharedMaterial->uniform4x4("model", model);
