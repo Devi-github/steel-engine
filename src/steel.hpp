@@ -104,19 +104,20 @@ private:
         }
     }
     void controlCamera(double time) {
+        constexpr float SPEED_MULTIPLIER = 25.0f;
         editorCamera.transform.rotate(glm::vec3(-glm::radians(deltaMouseY) * 0.1, glm::radians(deltaMouseX) * 0.1, 0));
 
         if(getKey(GLFW_KEY_W)) {
-            editorCamera.transform.position += editorCamera.transform.forward() * cameraSpeed * 100.0f * (float)time;
+            editorCamera.transform.position += editorCamera.transform.forward() * cameraSpeed * SPEED_MULTIPLIER * (float)time;
         }
         if(getKey(GLFW_KEY_S)) {
-            editorCamera.transform.position -= editorCamera.transform.forward() * cameraSpeed * 100.0f * (float)time;
+            editorCamera.transform.position -= editorCamera.transform.forward() * cameraSpeed * SPEED_MULTIPLIER * (float)time;
         }
         if(getKey(GLFW_KEY_A)) {
-            editorCamera.transform.position -= editorCamera.transform.right() * cameraSpeed * 100.0f * (float)time;
+            editorCamera.transform.position -= editorCamera.transform.right() * cameraSpeed * SPEED_MULTIPLIER * (float)time;
         }
         if(getKey(GLFW_KEY_D)) {
-            editorCamera.transform.position += editorCamera.transform.right() * cameraSpeed * 100.0f * (float)time;
+            editorCamera.transform.position += editorCamera.transform.right() * cameraSpeed * SPEED_MULTIPLIER * (float)time;
         }
     }
     void render_main_bar() {
@@ -342,9 +343,7 @@ private:
             glm::vec3 minBound = mr->mesh->findMinBoundWithModel(chosenGameObject->transform.modelMatrix());
             glm::vec3 maxBound = mr->mesh->findMaxBoundWithModel(chosenGameObject->transform.modelMatrix());
 
-            draw_line(minBound, maxBound);
-
-            glm::vec3 center = (minBound + maxBound) / 2.0f;
+            glm::vec3 center = (minBound + maxBound) / 2.0f + chosenGameObject->transform.position;
 
             float x_sc = maxBound.x - minBound.x;
             float y_sc = maxBound.y - minBound.y;
@@ -400,7 +399,7 @@ private:
     }
     void onMouseWheelCallback(double xoffset, double yoffset) override {
         if(getMouseButton(1)) {
-            cameraSpeed += yoffset * 0.1;
+            cameraSpeed *= 1 + yoffset * 0.1;
             cameraSpeed = cameraSpeed < 0.01f ? 0.01 : (cameraSpeed > 100 ? 100 : cameraSpeed);
         }
         BaseApplication::onMouseWheelCallback(xoffset, yoffset);

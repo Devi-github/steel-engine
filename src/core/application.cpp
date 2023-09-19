@@ -108,11 +108,10 @@ int BaseApplication::run()
     double delta = 0; // Small amount, so that divide by zero won't happen
 
     while(!glfwWindowShouldClose(window)) {
-        render(delta);
         time = glfwGetTime();
+        render(delta);
         update(delta);
         delta = glfwGetTime() - time;
-        time = glfwGetTime();
         totalTimeElapsed = time;
     }
     onEnd();

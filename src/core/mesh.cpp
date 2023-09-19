@@ -126,7 +126,7 @@ glm::vec3 Mesh::findMinBoundWithModel(glm::mat4 model)
         float z = vertexBuffer[i + 2];
 
         glm::vec4 tmp(x, y, z, 1);
-        tmp = tmp * model;
+        tmp = model * tmp;
 
         if(tmp.x < minBound.x) minBound.x = tmp.x;
         if(tmp.y < minBound.y) minBound.y = tmp.y;
@@ -144,7 +144,7 @@ glm::vec3 Mesh::findMaxBoundWithModel(glm::mat4 model)
         float z = vertexBuffer[i + 2];
 
         glm::vec4 tmp(x, y, z, 1);
-        tmp = tmp * model;
+        tmp = model * tmp;
 
         if(tmp.x > maxBound.x) maxBound.x = tmp.x;
         if(tmp.y > maxBound.y) maxBound.y = tmp.y;
