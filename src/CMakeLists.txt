@@ -1,5 +1,4 @@
 find_package(OpenGL REQUIRED)
-find_package(glm REQUIRED)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -56,4 +55,8 @@ endforeach()
 add_custom_target(SHADERS ALL DEPENDS ${SPV_SHADERS})
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES} glfw OpenGL imgui glm::glm)
+if(STEEL_BUILD_WINDOWS)
+    target_link_libraries(${PROJECT_NAME} glew32 glfw3 opengl32 imgui)
+else()
+    target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES} glfw3 glew imgui glm)
+endif()

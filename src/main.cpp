@@ -4,6 +4,7 @@
 Camera* Camera::currentCamera = nullptr;
 BaseApplication* BaseApplication::instance = nullptr;
 Scene* Scene::currentScene = nullptr;
+MoveArrow* MoveArrow::instance = nullptr;
 
 int main() {
     srand(time(NULL));

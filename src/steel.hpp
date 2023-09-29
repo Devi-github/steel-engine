@@ -241,7 +241,7 @@ private:
 
             for(auto object : scene.objects) {
                 std::stringstream label;
-                label << object->name << " (0x" << (unsigned long)object << ")";
+                label << object->name << " (0x" << (unsigned long long)object << ")";
                 std::string _label = label.str();
                 if(ImGui::Selectable(_label.c_str(), chosenGameObject == object)) {
                     chosenGameObject = object;
@@ -271,7 +271,7 @@ private:
 
         ImGui::Begin("Object information");
         if(chosenGameObject != nullptr) {
-            ImGui::InputText("Name", chosenGameObject->name.data(), 128); // FIXME: Create custom method for this, because SIGSEGV
+            //ImGui::InputText("Name", chosenGameObject->name.c_str(), 128); // FIXME: Create custom method for this, because SIGSEGV
 
             ImGui::DragFloat3("Position", (float*)&objtrans->position, 0.1f);
             ImGui::DragFloat3("Rotation", (float*)&objtrans->rotation, 0.05f);

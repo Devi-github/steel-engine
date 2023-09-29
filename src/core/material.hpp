@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <map>
 #include <string>
-#include <bits/stdc++.h>
 
 #include "shader.hpp"
 

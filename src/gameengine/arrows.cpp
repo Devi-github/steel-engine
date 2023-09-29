@@ -21,7 +21,6 @@ const float arrowBody[] = { // Looking right
 
 static Shader* arrowShader;
 static Material* arrowMaterial;
-static MoveArrow* moveArrow;
 
 const char arrowVertexShader[] = "#version 330 core\n"
 "layout (location = 0) in vec3 vertexPos;\n"
@@ -43,13 +42,12 @@ void setup_arrows()
     arrowShader->loadShaders(arrowVertexShader, arrowFragmentShader);
     arrowMaterial = new Material();
     arrowMaterial->loadShader(arrowShader);
-    moveArrow = new MoveArrow();
-    moveArrow->instance = moveArrow;
+    MoveArrow::instance = new MoveArrow();
 }
 
 void draw_move_arrows(glm::vec3 position)
 {
-    moveArrow->draw(position);
+    MoveArrow::instance->draw(position);
 }
 
 void draw_scale_arrows(glm::vec3 position)
