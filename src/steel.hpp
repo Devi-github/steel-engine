@@ -4,12 +4,14 @@
 #include "core/mesh.hpp"
 #include "core/object.hpp"
 #include "core/scene_manager.hpp"
+#include "core/shader.hpp"
+#include "core/screen.hpp"
+
+#include "gameengine/ui.hpp"
+#include "gameengine/debug.hpp"
 #include "gameengine/camera.hpp"
 #include "gameengine/primitives.hpp"
-#include "core/shader.hpp"
 #include "gameengine/arrows.hpp"
-#include "core/screen.hpp"
-#include "gameengine/debug.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -274,35 +276,9 @@ private:
 
         ImGui::End();
 
-        ImGui::Begin("Object information");
-        if(chosenGameObject != nullptr) {
-            ImGui::InputText("Name", chosenGameObject->name.data(), 128); // FIXME: Create custom method for this, because SIGSEGV
+        draw_object_info(chosenGameObject);
 
-            ImGui::DragFloat3("Position", (float*)&objtrans->position, 0.1f);
-            ImGui::DragFloat3("Rotation", (float*)&objtrans->rotation, 0.05f);
-            ImGui::DragFloat3("Scale", (float*)&objtrans->scale, 0.1f);
-
-            draw_move_arrows(objtrans->position);
-        }
-        ImGui::End();
-
-        ImGui::Begin("Mesh renderer");
-        if(chosenGameObject != nullptr) {
-            MeshRenderer* mr = chosenGameObject->getComponent<MeshRenderer>();
-            if(mr != nullptr) {
-                ImGui::Text("Mesh renderer found at %p", mr);
-                ImGui::Text("VBO: %u VAO: %u EBO: %u", mr->mesh->vbo, mr->mesh->vao, mr->mesh->ebo);
-                ImGui::Text("Mesh renderer mesh is at: %p", mr->mesh);
-                ImGui::Text("Mesh vertex buffer is at: %p", mr->mesh->vertexBuffer);
-                ImGui::Text("Mesh element buffer is at: %p", mr->mesh->indices);
-                ImGui::Text("Vertices: %d", mr->mesh->vertexCount);
-                ImGui::Text("Material is at: %p", mr->material);
-                ImGui::Text("Shared material is at: %p", mr->sharedMaterial);
-            } else {
-                ImGui::Text("No mesh renderer component found!");
-            }
-        }
-        ImGui::End();
+        draw_mesh_renderer(chosenGameObject);
 
         ImGui::Begin("Rendering info");
         if(Scene::currentScene != nullptr) {
@@ -311,15 +287,7 @@ private:
         }
         ImGui::End();
 
-        ImGui::Begin("Camera");
-        if(Camera::currentCamera != nullptr) {
-            ImGui::Text("Position: X: %f Y: %f Z: %f", editorCamera.transform.position.x, 
-                editorCamera.transform.position.y, editorCamera.transform.position.z);
-            ImGui::Text("Look Direction: X: %f Y: %f Z: %f", editorCamera.transform.forward().x, 
-                editorCamera.transform.forward().y, editorCamera.transform.forward().z);
-            ImGui::DragFloat("Camera Speed", &cameraSpeed, 0.05f, 0.02f, 100.0f);
-        }
-        ImGui::End();
+        draw_camera_info(editorCamera, cameraSpeed);
 
         imgui_render();
     }
@@ -343,7 +311,7 @@ private:
             glm::vec3 minBound = mr->mesh->findMinBoundWithModel(chosenGameObject->transform.modelMatrix());
             glm::vec3 maxBound = mr->mesh->findMaxBoundWithModel(chosenGameObject->transform.modelMatrix());
 
-            glm::vec3 center = (minBound + maxBound) / 2.0f + chosenGameObject->transform.position;
+            glm::vec3 center = (minBound + maxBound) / 2.0f;
 
             float x_sc = maxBound.x - minBound.x;
             float y_sc = maxBound.y - minBound.y;

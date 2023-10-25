@@ -15,7 +15,7 @@ set(SOURCE_FILES main.cpp steel.hpp
     
     gameengine/primitives.cpp gameengine/lighting.cpp
     gameengine/camera.cpp gameengine/arrows.cpp
-    gameengine/debug.cpp
+    gameengine/debug.cpp gameengine/ui.cpp
 )
 
 set(GLSL_VALIDATOR /usr/bin/glslangValidator)
@@ -58,4 +58,4 @@ endforeach()
 add_custom_target(SHADERS ALL DEPENDS ${SPV_SHADERS})
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES} glfw OpenGL imgui glm::glm)
+target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES} glfw OpenGL imgui glm)

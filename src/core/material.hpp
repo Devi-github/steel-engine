@@ -10,6 +10,7 @@
 struct MaterialProperty {
     GLenum type;
     GLuint location;
+    char name[32];
 };
 
 class Material {

@@ -40,6 +40,7 @@ void Material::loadShader(Shader *shader)
         GLsizei size, length;
         glGetActiveUniform(program, i, 32, &length, &size, &prop.type, name);
         prop.location = glGetUniformLocation(program, name);
+        strcpy(prop.name, name);
 
         std::string rlname = name;
 
