@@ -53,6 +53,7 @@ protected:
     void setVsync(int);
     
     bool wireframeMode = false;
+    bool exitPolled = false;
 
     double mouseX, mouseY;
     double deltaMouseX, deltaMouseY;

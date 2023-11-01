@@ -108,6 +108,7 @@ int BaseApplication::run()
     double delta = 0; // Small amount, so that divide by zero won't happen
 
     while(!glfwWindowShouldClose(window)) {
+        if(exitPolled) stop();
         time = glfwGetTime();
         render(delta);
         update(delta);
@@ -161,6 +162,7 @@ void BaseApplication::setVsync(int interval) {
 }
 
 void BaseApplication::stop(int exitCode) {
+    exitPolled = true;
     glfwSetWindowShouldClose(window, 1);
     this->exitCode = exitCode;
 }

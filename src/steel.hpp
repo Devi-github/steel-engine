@@ -12,6 +12,7 @@
 #include "gameengine/camera.hpp"
 #include "gameengine/primitives.hpp"
 #include "gameengine/arrows.hpp"
+#include "gameengine/functions.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -122,150 +123,12 @@ private:
             editorCamera.transform.position += editorCamera.transform.right() * cameraSpeed * SPEED_MULTIPLIER * (float)time;
         }
     }
-    void render_main_bar() {
-        ImGui::BeginMainMenuBar();
-
-        if(ImGui::BeginMenu("File")) {
-            if(ImGui::MenuItem("New Scene", "", false, false)) {
-                std::cout << "New Scene is not yet implemented" << std::endl;
-            }
-            if(ImGui::MenuItem("Exit", "ALT+F4")) {
-                stop();
-            }
-            ImGui::EndMenu();
-        }
-        if(ImGui::BeginMenu("Edit")) {
-            if(ImGui::MenuItem("Deselect", "CTRL+SHIFT+D", false, chosenGameObject != nullptr)) {
-                chosenGameObject = nullptr;
-            }
-            if(ImGui::MenuItem("Duplicate", "CTRL+D", false, chosenGameObject != nullptr)) {
-                duplicate();
-            }
-            ImGui::EndMenu();
-        }
-// FIXME: I don't know why, but creating new objects overwrites a previously created object's mesh
-        if(ImGui::BeginMenu("SteelObject")) {
-            if(ImGui::BeginMenu("Create Object")) {
-                if(ImGui::MenuItem("New Cube")) {
-                    SteelObject* obj = new SteelObject();
-                    
-                    obj->name = "New Cube";
-
-                    scene.addObject(obj);
-
-                    auto renderer = obj->addComponent<MeshRenderer>();
-                    renderer->setMesh(constructMesh(Primitives::CUBE));
-
-                    renderer->material = Material::Default();
-
-                    float rnd = rand() / (float)RAND_MAX;
-
-                    renderer->material->uniform3("objectColor", 
-                        glm::vec3(
-                            rand() / (float)RAND_MAX, 
-                            rand() / (float)RAND_MAX, 
-                            rand() / (float)RAND_MAX
-                        )
-                    );
-
-                    chosenGameObject = obj;
-                }
-                if(ImGui::MenuItem("New Plane")) {
-                    SteelObject* obj = new SteelObject();
-                    
-                    obj->name = "New Plane";
-
-                    scene.addObject(obj);
-
-                    auto renderer = obj->addComponent<MeshRenderer>();
-                    renderer->setMesh(constructMesh(Primitives::PLANE));
-
-                    renderer->material = Material::Default();
-
-                    float rnd = rand() / (float)RAND_MAX;
-
-                    renderer->material->uniform3("objectColor", 
-                        glm::vec3(
-                            rand() / (float)RAND_MAX, 
-                            rand() / (float)RAND_MAX, 
-                            rand() / (float)RAND_MAX
-                        )
-                    );
-
-                    chosenGameObject = obj;
-                }
-                if(ImGui::MenuItem("New Sphere")) {
-                    SteelObject* obj = new SteelObject();
-
-                    obj->name = "New Sphere";
-
-                    scene.addObject(obj);
-
-                    auto renderer = obj->addComponent<MeshRenderer>();
-                    renderer->setMesh(constructMesh(Primitives::SPHERE));
-
-                    renderer->material = Material::Default();
-
-                    float rnd = rand() / (float)RAND_MAX;
-
-                    renderer->material->uniform3("objectColor", 
-                        glm::vec3(
-                            rand() / (float)RAND_MAX, 
-                            rand() / (float)RAND_MAX, 
-                            rand() / (float)RAND_MAX
-                        )
-                    );
-
-                    chosenGameObject = obj;
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenu();
-        }
-        if(ImGui::BeginMenu("View", true)) {
-            ImGui::Checkbox("Wireframe Mode", &wireframeMode);
-            ImGui::EndMenu();
-        }
-        if(ImGui::BeginMenu("Window", false)) {
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMainMenuBar();
-    }
-    void duplicate() {
-        if(chosenGameObject == nullptr) return;
-
-        SteelObject* obj = chosenGameObject->duplicate();
-        Scene::currentScene->addObject(obj);
-
-        chosenGameObject = obj;
-    }
-    void render_object_list() {
-        if(Scene::currentScene != nullptr) {
-            ImGui::Begin("Object list");
-
-            ImGui::BeginListBox("##");
-
-            for(auto object : scene.objects) {
-                std::stringstream label;
-                label << object->name << " (0x" << (unsigned long)object << ")";
-                std::string _label = label.str();
-                if(ImGui::Selectable(_label.c_str(), chosenGameObject == object)) {
-                    chosenGameObject = object;
-                }
-            }
-
-            ImGui::EndListBox();
-
-            ImGui::End();
-        }
-    }
     void render_ui(double time) {
         imgui_newframe();
 
-        render_main_bar();
+        draw_main_bar(scene, chosenGameObject, exitPolled, &wireframeMode);
 
-        render_object_list();
+        draw_object_list(scene, chosenGameObject);
 
         Transform* objtrans = &chosenGameObject->transform;
         
@@ -341,7 +204,7 @@ private:
             }
         }
         if(k == GLFW_KEY_D && a == GLFW_PRESS && m == GLFW_MOD_CONTROL) {
-            duplicate();
+            chosenGameObject = duplicate(scene, chosenGameObject);
         }
         if(k == GLFW_KEY_D && a == GLFW_PRESS && m == (GLFW_MOD_CONTROL | GLFW_MOD_SHIFT))
             chosenGameObject = nullptr;

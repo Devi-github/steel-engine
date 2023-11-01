@@ -16,6 +16,7 @@ set(SOURCE_FILES main.cpp steel.hpp
     gameengine/primitives.cpp gameengine/lighting.cpp
     gameengine/camera.cpp gameengine/arrows.cpp
     gameengine/debug.cpp gameengine/ui.cpp
+    gameengine/functions.cpp
 )
 
 set(GLSL_VALIDATOR /usr/bin/glslangValidator)
